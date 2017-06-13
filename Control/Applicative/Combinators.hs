@@ -7,23 +7,32 @@
 -- Stability   :  experimental
 -- Portability :  portable
 --
--- Common parser combinators defined for instances of 'Applicative' and
--- 'Alternative'.
+-- Parser combinators defined for instances of 'Applicative' and
+-- 'Alternative'. This module also re-exports functions that are commonly
+-- used in parsing from "Control.Applicative".
 
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE CPP          #-}
 
 module Control.Applicative.Combinators
-  ( between
+  ( (<|>)
+    -- $assocbo
+  , between
   , choice
   , count
   , count'
   , eitherP
   , endBy
   , endBy1
+  , many
+    -- $many
   , manyTill
+  , some
+    -- $some
   , someTill
   , option
+  , optional
+    -- $optional
   , sepBy
   , sepBy1
   , sepEndBy
@@ -41,6 +50,17 @@ import Data.Foldable
 #if !MIN_VERSION_base(4,8,0)
 import Data.Traversable (sequenceA)
 #endif
+
+-- $assocbo
+--
+-- This combinator implements choice. The parser @p \<|> q@ first applies
+-- @p@. If it succeeds, the value of @p@ is returned. If @p@ fails
+-- /without consuming any input/, parser @q@ is tried.
+--
+-- The parser is called /predictive/ since @q@ is only tried when parser @p@
+-- didn't consume any input (i.e. the look ahead is 1). This
+-- non-backtracking behaviour allows for both an efficient implementation of
+-- the parser combinators and the generation of good error messages.
 
 -- | @between open close p@ parses @open@, followed by @p@ and @close@.
 -- Returns the value returned by @p@.
@@ -60,6 +80,8 @@ choice = asum
 
 -- | @count n p@ parses @n@ occurrences of @p@. If @n@ is smaller or equal
 -- to zero, the parser equals to @return []@. Returns a list of @n@ values.
+--
+-- See also: 'count''.
 
 count :: Applicative m => Int -> m a -> m [a]
 count n p = sequenceA (replicate n p)
@@ -71,6 +93,8 @@ count n p = sequenceA (replicate n p)
 --
 -- Please note that @m@ /may/ be negative, in this case effect is the same
 -- as if it were equal to zero.
+--
+-- See also: 'count'.
 
 count' :: Alternative m => Int -> Int -> m a -> m [a]
 count' m' n' p = go m' n'
@@ -105,18 +129,38 @@ endBy1 :: Alternative m => m a -> m sep -> m [a]
 endBy1 p sep = some (p <* sep)
 {-# INLINE endBy1 #-}
 
--- | @manyTill p end@ applies parser @p@ /zero/ or more times until parser
--- @end@ succeeds. Returns the list of values returned by @p@. This parser
--- can be used to scan comments:
+-- $many
 --
--- > simpleComment = string "<!--" >> manyTill anyChar (string "-->")
+-- @many p@ applies the parser @p@ /zero/ or more times and returns a list
+-- of the returned values of @p@. Note that if the @p@ parser fails
+-- consuming input, then the entire @many p@ parser fails with the error
+-- message @p@ produced instead of just stopping iterating. In these cases
+-- wrapping @p@ with 'try' may be desirable.
+--
+-- > identifier = (:) <$> letter <*> many (alphaNumChar <|> char '_')
+
+-- | @manyTill p end@ applies parser @p@ /zero/ or more times until parser
+-- @end@ succeeds. Returns the list of values returned by @p@.
+--
+-- See also: 'skipMany', 'skipManyTill'.
 
 manyTill :: Alternative m => m a -> m end -> m [a]
 manyTill p end = go where go = ([] <$ end) <|> ((:) <$> p <*> go)
 {-# INLINE manyTill #-}
 
+-- $some
+--
+-- @some p@ applies the parser @p@ /one/ or more times and returns a list of
+-- the returned values of @p@. The note about behavior of the combinator in
+-- the case when @p@ fails consuming input (see 'A.many') applies to 'some'
+-- as well.
+--
+-- > word = some letter
+
 -- | @someTill p end@ works similarly to @manyTill p end@, but @p@ should
 -- succeed at least once.
+--
+-- See also: 'skipSome', 'skipSomeTill'.
 
 someTill :: Alternative m => m a -> m end -> m [a]
 someTill p end = (:) <$> p <*> manyTill p end
@@ -127,10 +171,18 @@ someTill p end = (:) <$> p <*> manyTill p end
 -- by @p@.
 --
 -- > priority = option 0 (digitToInt <$> digitChar)
+--
+-- See also: 'optional'.
 
 option :: Alternative m => a -> m a -> m a
 option x p = p <|> pure x
 {-# INLINE option #-}
+
+-- $optional
+--
+-- @optional p@ tries to apply the parser @p@. It will parse @p@ or nothing.
+-- It only fails if @p@ fails after consuming input. On success result of
+-- @p@ is returned inside of 'Just', on failure 'Nothing' is returned.
 
 -- | @sepBy p sep@ parses /zero/ or more occurrences of @p@, separated by
 -- @sep@. Returns a list of values returned by @p@.
@@ -164,7 +216,7 @@ sepEndBy1 p sep = (:) <$> p <*> ((sep *> sepEndBy p sep) <|> pure [])
 -- | @skipMany p@ applies the parser @p@ /zero/ or more times, skipping its
 -- result.
 --
--- > space = skipMany spaceChar
+-- See also: 'manyTill', 'skipManyTill'.
 
 skipMany :: Alternative m => m a -> m ()
 skipMany p = void $ many p
@@ -172,6 +224,8 @@ skipMany p = void $ many p
 
 -- | @skipSome p@ applies the parser @p@ /one/ or more times, skipping its
 -- result.
+--
+-- See also: 'someTill', 'skipSomeTill'.
 
 skipSome :: Alternative m => m a -> m ()
 skipSome p = void $ some p
@@ -180,6 +234,8 @@ skipSome p = void $ some p
 -- | @skipManyTill p end@ applies the parser @p@ /zero/ or more times
 -- skipping results until parser @end@ succeeds. Result parsed by @end@ is
 -- then returned.
+--
+-- See also: 'manyTill', 'skipMany'.
 
 skipManyTill :: Alternative m => m a -> m end -> m end
 skipManyTill p end = go
@@ -190,6 +246,8 @@ skipManyTill p end = go
 -- | @skipSomeTill p end@ applies the parser @p@ /one/ or more times
 -- skipping results until parser @end@ succeeds. Result parsed by @end@ is
 -- then returned.
+--
+-- See also: 'someTill', 'skipSome'.
 
 skipSomeTill :: Alternative m => m a -> m end -> m end
 skipSomeTill p end = p *> skipManyTill p end
