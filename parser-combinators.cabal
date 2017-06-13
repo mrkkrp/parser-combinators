@@ -1,0 +1,34 @@
+name:                 parser-combinators
+version:              0.1.0
+cabal-version:        >= 1.10
+tested-with:          GHC==7.8.4, GHC==7.10.3, GHC==8.0.2, GHC==8.2.1
+license:              BSD3
+license-file:         LICENSE.md
+author:               Mark Karpov <markkarpov92@gmail.com>
+maintainer:           Mark Karpov <markkarpov92@gmail.com>
+homepage:             https://github.com/mrkkrp/parser-combinators
+bug-reports:          https://github.com/mrkkrp/parser-combinators/issues
+category:             Parsing
+synopsis:             Lightweight package providing commonly useful parser combinators
+build-type:           Simple
+description:          Lightweight package providing commonly useful parser combinators.
+extra-doc-files:      CHANGELOG.md
+                    , README.md
+
+source-repository head
+  type:               git
+  location:           https://github.com/mrkkrp/parser-combinators.git
+
+flag dev
+  description:        Turn on development settings.
+  manual:             True
+  default:            False
+
+library
+  build-depends:      base             >= 4.7 && < 5.0
+  exposed-modules:    Control.Applicative.Combinators
+  if flag(dev)
+    ghc-options:      -Wall -Werror
+  else
+    ghc-options:      -O2 -Wall
+  default-language:   Haskell2010
