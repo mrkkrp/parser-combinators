@@ -182,7 +182,9 @@ endBy1 p sep = some (p <* sep)
 -- See also: 'skipMany', 'skipManyTill'.
 
 manyTill :: Alternative m => m a -> m end -> m [a]
-manyTill p end = go where go = ([] <$ end) <|> ((:) <$> p <*> go)
+manyTill p end = go
+  where
+    go = ([] <$ end) <|> ((:) <$> p <*> go)
 {-# INLINE manyTill #-}
 
 -- | @'someTill' p end@ works similarly to @'manyTill' p end@, but @p@
