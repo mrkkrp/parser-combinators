@@ -68,7 +68,6 @@ module Control.Applicative.Combinators
 where
 
 import Control.Applicative
-import Control.Monad (void)
 import Data.Foldable
 
 #if !MIN_VERSION_base(4,8,0)
@@ -243,8 +242,9 @@ sepEndBy1 p sep = (:) <$> p <*> ((sep *> sepEndBy p sep) <|> pure [])
 -- See also: 'manyTill', 'skipManyTill'.
 
 skipMany :: Alternative m => m a -> m ()
-skipMany p = void (many p) -- FIXME can this be made faster by not building
-             -- the list?
+skipMany p = go
+  where
+    go = (p *> go) <|> pure ()
 {-# INLINE skipMany #-}
 
 -- | @'skipSome' p@ applies the parser @p@ /one/ or more times, skipping its
@@ -253,7 +253,7 @@ skipMany p = void (many p) -- FIXME can this be made faster by not building
 -- See also: 'someTill', 'skipSomeTill'.
 
 skipSome :: Alternative m => m a -> m ()
-skipSome p = void (some p) -- FIXME the same here
+skipSome p = p *> skipMany p
 {-# INLINE skipSome #-}
 
 -- | @'skipManyTill' p end@ applies the parser @p@ /zero/ or more times
