@@ -28,9 +28,9 @@
 -- operator that allows to express choice. In libraries that do not
 -- backtrack everything automatically, the choice operator and everything
 -- that is build on top of it require the parser of the left hand side to
--- backtrack in order for the other alternative branch of paring to be
--- tried. Thus it is the responsibility of the programmer to wrap more
--- complex, composite parsers in @try@ to achieve correct behavior.
+-- backtrack in order for the alternative branch of parsing to be tried.
+-- Thus it is the responsibility of the programmer to wrap more complex,
+-- composite parsers in @try@ to achieve correct behavior.
 
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE CPP          #-}
