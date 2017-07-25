@@ -46,7 +46,7 @@ module Control.Monad.Permutations
   ) where
 
 
-import Control.Applicative (Alternative(..), optional)
+import Control.Applicative
 
 
 -- |
