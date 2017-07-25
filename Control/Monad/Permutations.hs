@@ -71,7 +71,11 @@ instance Alternative m => Applicative (Permutation m) where
 
 -- |
 -- \"Unlifts\" a permutation parser into a parser to be evaluated.
-runPermutation :: (Alternative m, Monad m) => Permutation m a -> m a
+runPermutation
+  :: ( Alternative m
+     , Monad m)
+  => Permutation m a -- ^ Permutation specification
+  -> m a             -- ^ Resulting base monad capable of handling the permutation
 runPermutation (P value parser) = optional parser >>= f
    where
       f  Nothing = maybe empty pure value
@@ -80,10 +84,17 @@ runPermutation (P value parser) = optional parser >>= f
 
 -- |
 -- \"Unlifts\" a permutation parser into a parser to be evaluated with an
--- intercalted effect. Useful for seperators between pemutation elements.
-intercalateEffect :: (Alternative m, Monad m) => m b -> Permutation m a -> m a
-intercalateEffect sep perm = run (pure ()) sep perm
+-- intercalted effect. Useful for seperators between permutation elements.
+intercalateEffect
+  :: ( Alternative m
+     , Monad m)
+  => m b             -- ^ Effect to be intercalated between permutation components
+  -> Permutation m a -- ^ Permutation specification
+  -> m a             -- ^ Resulting base monad capable of handling the permutation
+intercalateEffect = run noEffect
    where
+     noEffect = pure ()
+     
      run :: (Alternative m, Monad m) => m c -> m b -> Permutation m a -> m a
      run headSep tailSep (P value parser) = optional (headSep *> parser) >>= f
        where
@@ -93,7 +104,10 @@ intercalateEffect sep perm = run (pure ()) sep perm
 
 -- |
 -- \"Lifts\" a parser to a permutation parser.
-toPermutation :: Alternative m => m a -> Permutation m a 
+toPermutation
+  :: Alternative m
+  => m a -- ^ Permutation component
+  -> Permutation m a 
 toPermutation p = P Nothing $ pure <$> p
 
 
@@ -102,5 +116,9 @@ toPermutation p = P Nothing $ pure <$> p
 --
 -- If no permutation containg the supplied parser can be parsed from the input,
 -- then the supplied defualt value is returned in lieu of a parse result.
-toPermutationWithDefault :: Alternative m => a -> m a -> Permutation m a 
+toPermutationWithDefault
+  :: Alternative m
+  => a   -- ^ Default Value
+  -> m a -- ^ Permutation component
+  -> Permutation m a
 toPermutationWithDefault v p = P (Just v) $ pure <$> p
