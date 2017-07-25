@@ -20,6 +20,16 @@
 -- applicative\" combinators for constuction which denies the library user
 -- the ability to lift and unlift permutation parsing into any Applicative
 -- computational context.
+--
+-- For example, suppose we want to parse a permutation of:
+-- an optional string of @a@'s, the character @b@ and an optional @c@.
+-- Using a standard parsing library combinator @char@, this can be described
+-- by:
+--
+-- > test = runPermutation $
+-- >          (,,) <$> toPermutationWithDefault ""  (some (char 'a'))
+-- >               <*> toPermutation (char 'b')
+-- >               <*> toPermutationWithDefault '_' (char 'c')
 
 module Control.Alternative.Permutations
   ( Permutation()
@@ -33,6 +43,8 @@ module Control.Alternative.Permutations
 import Control.Applicative (Alternative(..), optional)
 
 
+-- |
+-- An Applicative wrapper-type for constructing permutation parsers.
 data Permutation m a = P (Maybe a) (m (Permutation m a))
 
 
