@@ -1,5 +1,11 @@
 -- |
--- Module      :  Control.Alternative.Permutations
+-- Module      :  Control.Monad.Permutations
+-- Copyright   :  © 2017 Mark Karpov
+-- License     :  BSD 3 clause
+--
+-- Maintainer  :  Mark Karpov <markkarpov92@gmail.com>
+-- Stability   :  experimental
+-- Portability :  portable
 --
 -- This module is a generalization of the package @parsec-permutation@
 -- authored by Samuel Hoffstaetter:
@@ -31,7 +37,7 @@
 -- >               <*> toPermutation (char 'b')
 -- >               <*> toPermutationWithDefault '_' (char 'c')
 
-module Control.Alternative.Permutations
+module Control.Monad.Permutations
   ( Permutation()
   , intercalateEffect
   , runPermutation
@@ -69,7 +75,7 @@ runPermutation :: (Alternative m, Monad m) => Permutation m a -> m a
 runPermutation (P value parser) = optional parser >>= f
    where
       f  Nothing = maybe empty pure value
-      f (Just p) = runPermParser p
+      f (Just p) = runPermutation p
 
 
 -- |
@@ -87,7 +93,7 @@ intercalateEffect sep perm = run (pure ()) sep perm
 
 -- |
 -- \"Lifts\" a parser to a permutation parser.
-toPermutation :: Alternative m => m a -> Permutationm a 
+toPermutation :: Alternative m => m a -> Permutation m a 
 toPermutation p = P Nothing $ pure <$> p
 
 
