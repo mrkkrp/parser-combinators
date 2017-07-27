@@ -97,6 +97,27 @@ runPermutation (P value parser) = optional parser >>= f
 
 -- | \"Unlifts\" a permutation parser into a parser to be evaluated with an
 -- intercalated effect. Useful for separators between permutation elements.
+---
+-- For example, suppose that similar to above we want to parse a permutation of:
+-- an optional string of @a@'s, the character @b@ and an optional @c@. /However/,
+-- we also want each element of the permutation to be sperated by a colon.
+-- Using a standard parsing library combinator @char@, this can be described
+-- using the Applicative instance by:
+--
+-- > test = intercalateEffect (char ':') $
+-- >          (,,) <$?> ("", some (char 'a'))
+-- >               <||> char 'b'
+-- >               <|?> ('_', char 'c')
+--
+-- This will accept strings such as: \"a:b:c\", \"b:c:a\", \"b:aa\", \"b\", etc.
+--
+-- Note that the efect is intercalated /between/ permutation components and that:
+--
+--  - There is never an effect parsed preceeding the first component of the permutation
+--
+--  - There is never an effect parsed following the last component of the permutation
+--
+--  - No effects are intercalated between missing components with a default value.
 
 intercalateEffect
   :: ( Alternative m
@@ -107,12 +128,14 @@ intercalateEffect
 intercalateEffect = run noEffect
    where
      noEffect = pure ()
-     
+
      run :: (Alternative m, Monad m) => m c -> m b -> Permutation m a -> m a
-     run headSep tailSep (P value parser) = optional (headSep *> parser) >>= f
+     run headSep tailSep (P value parser) = optional headSep >>= f
        where
          f  Nothing = maybe empty pure value
-         f (Just p) = run tailSep tailSep p
+         f (Just _) = optional parser >>= g
+         g  Nothing = maybe empty pure value
+         g (Just p) = run tailSep tailSep p
 
 -- | \"Lifts\" a parser to a permutation parser.
 
