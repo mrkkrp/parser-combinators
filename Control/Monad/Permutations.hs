@@ -24,14 +24,14 @@
 --
 -- Other permutation parsing libraries tend towards using special \"almost
 -- applicative\" combinators for construction which denies the library user
--- the ability to lift and unlift permutation parsing into any Applicative
+-- the ability to lift and unlift permutation parsing into any 'Applicative'
 -- computational context. We redefine these combinators as convenience
--- operators here alongside the equivalent Applicative instance.
+-- operators here alongside the equivalent 'Applicative' instance.
 --
 -- For example, suppose we want to parse a permutation of:
 -- an optional string of @a@'s, the character @b@ and an optional @c@.
 -- Using a standard parsing library combinator @char@, this can be described
--- using the Applicative instance by:
+-- using the 'Applicative' instance by:
 --
 -- > test = runPermutation $
 -- >          (,,) <$> toPermutationWithDefault ""  (some (char 'a'))
@@ -65,7 +65,7 @@ module Control.Monad.Permutations
 
 import Control.Applicative
 
--- | An Applicative wrapper-type for constructing permutation parsers.
+-- | An 'Applicative' wrapper-type for constructing permutation parsers.
 
 data Permutation m a = P (Maybe a) (m (Permutation m a))
 
@@ -102,7 +102,7 @@ runPermutation (P value parser) = optional parser >>= f
 -- an optional string of @a@'s, the character @b@ and an optional @c@. /However/,
 -- we also want each element of the permutation to be separated by a colon.
 -- Using a standard parsing library combinator @char@, this can be described
--- using the Applicative instance by:
+-- using the 'Applicative' instance by:
 --
 -- > test = intercalateEffect (char ':') $
 -- >          (,,) <$?> ("", some (char 'a'))
