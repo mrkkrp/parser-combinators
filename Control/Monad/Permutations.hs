@@ -10,7 +10,7 @@
 -- This module is a generalization of the package @parsec-permutation@
 -- authored by Samuel Hoffstaetter:
 --
--- http://hackage.haskell.org/package/parsec-permutation
+-- https://hackage.haskell.org/package/parsec-permutation
 --
 -- This module also takes inspiration from the algorithm is described
 -- in: /Parsing Permutation Phrases/, by Arthur Baars, Andres Loh and
@@ -18,7 +18,7 @@
 -- Workshop 2001.
 --
 -- From these two works we derive a flexible and general method for
--- parsing permutations over an Applicative structure. Quite useful
+-- parsing permutations over an 'Applicative' structure. Quite useful
 -- in conjunction with \"Free\" constructions of Applicatives, Monads,
 -- etc.
 --
@@ -71,16 +71,16 @@ data Permutation m a = P (Maybe a) (m (Permutation m a))
 
 instance Functor m => Functor (Permutation m) where
 
-    fmap f (P v p) = P (f <$> v) (fmap f <$> p)
+  fmap f (P v p) = P (f <$> v) (fmap f <$> p)
 
 instance Alternative m => Applicative (Permutation m) where
 
-    pure value = P (Just value) empty
+  pure value = P (Just value) empty
 
-    lhs@(P f v) <*> rhs@(P g w) = P (f <*> g) (lhsAlt <|> rhsAlt)
-      where
-        lhsAlt = (<*> rhs) <$> v
-        rhsAlt = (lhs <*>) <$> w
+  lhs@(P f v) <*> rhs@(P g w) = P (f <*> g) (lhsAlt <|> rhsAlt)
+    where
+      lhsAlt = (<*> rhs) <$> v
+      rhsAlt = (lhs <*>) <$> w
 
 -- | \"Unlifts\" a permutation parser into a parser to be evaluated.
 
@@ -97,10 +97,10 @@ runPermutation (P value parser) = optional parser >>= f
 
 -- | \"Unlifts\" a permutation parser into a parser to be evaluated with an
 -- intercalated effect. Useful for separators between permutation elements.
----
+--
 -- For example, suppose that similar to above we want to parse a permutation of:
 -- an optional string of @a@'s, the character @b@ and an optional @c@. /However/,
--- we also want each element of the permutation to be sperated by a colon.
+-- we also want each element of the permutation to be separated by a colon.
 -- Using a standard parsing library combinator @char@, this can be described
 -- using the Applicative instance by:
 --
@@ -111,7 +111,7 @@ runPermutation (P value parser) = optional parser >>= f
 --
 -- This will accept strings such as: \"a:b:c\", \"b:c:a\", \"b:aa\", \"b\", etc.
 --
--- Note that the efect is intercalated /between/ permutation components and that:
+-- Note that the effect is intercalated /between/ permutation components and that:
 --
 --  - There is never an effect parsed preceeding the first component of the permutation
 --
