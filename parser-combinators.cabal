@@ -32,7 +32,10 @@ library
 
   exposed-modules:    Control.Applicative.Combinators
                       Control.Applicative.Combinators.NonEmpty
+<<<<<<< HEAD
                       Control.Applicative.Permutations
+=======
+>>>>>>> df37cd900d251637c07de4e2b0e8455fb54816c5
   if flag(dev)
     ghc-options:      -Wall -Werror
   else

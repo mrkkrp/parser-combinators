@@ -4,6 +4,9 @@
   list versions of some combinators and re-exports some `Data.List.NonEmpty`
   functions and types.
 
+* Added `Control.Applicative.Permutations` module that exports generalized
+  permutation parser combinators.
+
 ## Parser combinators 0.1.0
 
 * Initial release.
