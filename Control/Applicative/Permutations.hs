@@ -43,6 +43,8 @@
 -- >          (,,) <$?> ("", some (char 'a'))
 -- >               <||> char 'b'
 -- >               <|?> ('_', char 'c')
+--
+-- @since 0.2.0
 
 module Control.Applicative.Permutations
   ( -- ** Permutation type
