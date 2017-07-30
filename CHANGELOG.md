@@ -3,6 +3,9 @@
 * Added `Control.Applicative.Combinators.NonEmpty` module that exports
   non-empty list versions of combinators that cannot return empty lists.
 
+* Added `Control.Applicative.Permutations` module that exports generalized
+  permutation parser combinators.
+
 ## Parser combinators 0.1.0
 
 * Initial release.
