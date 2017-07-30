@@ -7,9 +7,6 @@
 * Added `Control.Applicative.Permutations` module that exports generalized
   permutation parser combinators.
 
-* Added `Control.Applicative.Permutations` module that exports generalized
-  permutation parser combinators.
-
 ## Parser combinators 0.1.0
 
 * Initial release.
