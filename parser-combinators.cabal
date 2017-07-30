@@ -26,7 +26,12 @@ flag dev
 
 library
   build-depends:      base             >= 4.5 && < 5.0
+
+  if !impl(ghc >= 8.0)
+    build-depends:    semigroups == 0.18.*
+
   exposed-modules:    Control.Applicative.Combinators
+                      Control.Applicative.Combinators.NonEmpty
                       Control.Applicative.Permutations
   if flag(dev)
     ghc-options:      -Wall -Werror
