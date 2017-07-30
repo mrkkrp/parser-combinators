@@ -36,7 +36,11 @@ script:
  - cabal build
  - cabal test --show-details=always
  - cabal sdist
- - cabal haddock | grep "100%" | wc -l | grep "3"
+ - case "$GHCVER" in
+     "7.4.2") true ;;
+     "7.6.3") true ;;
+     *) cabal haddock | grep "100%" | wc -l | grep "3" ;;
+   esac
 
 notifications:
   email: false
