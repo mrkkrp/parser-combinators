@@ -1,5 +1,5 @@
 ﻿-- |
--- Module      :  Control.Monad.Permutations
+-- Module      :  Control.Applicative.Permutations
 -- Copyright   :  © 2017 Mark Karpov
 -- License     :  BSD 3 clause
 --
@@ -46,13 +46,13 @@
 -- >               <||> char 'b'
 -- >               <|?> ('_', char 'c')
 
-module Control.Monad.Permutations
+module Control.Applicative.Permutations
   (
   -- ** Permutation type
     Permutation()
   -- ** Permutation evaluators
-  , intercalateEffect
   , runPermutation
+  , intercalateEffect
   -- ** Permutation constructors
   , toPermutation
   , toPermutationWithDefault
