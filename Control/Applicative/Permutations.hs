@@ -57,11 +57,11 @@ module Control.Applicative.Permutations
   , toPermutation
   , toPermutationWithDefault
   -- ** Convenience operators
-  , (<||>)
   , (<$$>)
-  , (<|?>)
   , (<$?>)
-  ) where
+  , (<||>)
+  , (<|?>) )
+where
 
 import Control.Applicative
 
