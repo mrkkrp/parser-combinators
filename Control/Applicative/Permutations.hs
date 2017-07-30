@@ -49,7 +49,7 @@
 module Control.Applicative.Permutations
   (
   -- ** Permutation type
-    Permutation()
+    Permutation
   -- ** Permutation evaluators
   , runPermutation
   , intercalateEffect
