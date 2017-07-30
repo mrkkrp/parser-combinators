@@ -31,8 +31,8 @@ library
     build-depends:    semigroups == 0.18.*
 
   exposed-modules:    Control.Applicative.Combinators
-                      Control.Applicative.Combinators.NonEmpty
-                      Control.Applicative.Permutations
+                    , Control.Applicative.Combinators.NonEmpty
+                    , Control.Applicative.Permutations
   if flag(dev)
     ghc-options:      -Wall -Werror
   else
