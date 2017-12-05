@@ -1,4 +1,4 @@
-﻿-- |
+-- |
 -- Module      :  Control.Applicative.Permutations
 -- Copyright   :  © 2017 Mark Karpov
 -- License     :  BSD 3 clause
