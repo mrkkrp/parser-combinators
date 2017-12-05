@@ -1,3 +1,8 @@
+## Parser combinators 0.2.1
+
+* Removed the byte order marking at the beginning of the
+  `Control.Applicative.Permutations` module.
+
 ## Parser combinators 0.2.0
 
 * Added `Control.Applicative.Combinators.NonEmpty` module that exports
