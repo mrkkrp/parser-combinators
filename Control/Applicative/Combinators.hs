@@ -63,6 +63,7 @@ module Control.Applicative.Combinators
   , sepEndBy1
   , skipMany
   , skipSome
+  , skipCount
   , skipManyTill
   , skipSomeTill )
 where
@@ -70,9 +71,12 @@ where
 import Control.Applicative
 import Data.Foldable
 
-#if !MIN_VERSION_base(4,8,0)
+#if MIN_VERSION_base(4,9,0)
+import Control.Monad (replicateM, replicateM_)
+#elif !MIN_VERSION_base(4,8,0)
 import Data.Traversable (sequenceA)
 #endif
+
 
 ----------------------------------------------------------------------------
 -- Re-exports from "Control.Applicative"
@@ -128,10 +132,14 @@ choice = asum
 -- | @'count' n p@ parses @n@ occurrences of @p@. If @n@ is smaller or equal
 -- to zero, the parser equals to @'pure' []@. Returns a list of @n@ values.
 --
--- See also: 'count''.
+-- See also: 'skipCount', 'count''.
 
 count :: Applicative m => Int -> m a -> m [a]
+#if MIN_VERSION_base(4,9,0)
+count = replicateM
+#else
 count n p = sequenceA (replicate n p)
+#endif
 {-# INLINE count #-}
 
 -- | @'count'' m n p@ parses from @m@ to @n@ occurrences of @p@. If @n@ is
@@ -257,6 +265,20 @@ skipMany p = go
 skipSome :: Alternative m => m a -> m ()
 skipSome p = p *> skipMany p
 {-# INLINE skipSome #-}
+
+-- | @'skipCount' n p@ parses @n@ occurrences of @p@, skipping its result. If
+-- @n@ is smaller or equal to zero, the parser equals to @'pure' []@. Returns a
+-- list of @n@ values.
+--
+-- See also: 'count', 'count''.
+
+skipCount :: Applicative m => Int -> m a -> m ()
+#if MIN_VERSION_base(4,9,0)
+skipCount = replicateM_
+#else
+skipCount n p = sequenceA_ (replicate n p)
+#endif
+{-# INLINE skipCount #-}
 
 -- | @'skipManyTill' p end@ applies the parser @p@ /zero/ or more times
 -- skipping results until parser @end@ succeeds. Result parsed by @end@ is
