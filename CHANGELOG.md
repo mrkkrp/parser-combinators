@@ -1,3 +1,7 @@
+## Parser combinators 0.3.0
+
+* Add the `skipCount` combinator.
+
 ## Parser combinators 0.2.1
 
 * Removed the byte order marking at the beginning of the

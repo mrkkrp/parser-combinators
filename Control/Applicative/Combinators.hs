@@ -271,6 +271,8 @@ skipSome p = p *> skipMany p
 -- list of @n@ values.
 --
 -- See also: 'count', 'count''.
+--
+-- @since 0.3.0
 
 skipCount :: Applicative m => Int -> m a -> m ()
 #if MIN_VERSION_base(4,9,0)
