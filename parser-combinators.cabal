@@ -1,5 +1,5 @@
 name:                 parser-combinators
-version:              0.2.1
+version:              0.3.0
 cabal-version:        >= 1.18
 tested-with:          GHC==7.4.2, GHC==7.6.3, GHC==7.8.4, GHC==7.10.3, GHC==8.0.2, GHC==8.2.2
 license:              BSD3
