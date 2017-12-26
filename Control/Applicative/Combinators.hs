@@ -77,7 +77,6 @@ import Control.Monad (replicateM, replicateM_)
 import Data.Traversable (sequenceA)
 #endif
 
-
 ----------------------------------------------------------------------------
 -- Re-exports from "Control.Applicative"
 
@@ -157,9 +156,7 @@ count' m' n' p = go m' n'
     go !m !n
       | n <= 0 || m > n = pure []
       | m > 0           = (:) <$> p <*> go (m - 1) (n - 1)
-      | otherwise       =
-          let f t ts = maybe [] (:ts) t
-          in f <$> optional p <*> go 0 (pred n)
+      | otherwise       = ((:) <$> p <*> go 0 (n - 1)) <|> pure []
 {-# INLINE count' #-}
 
 -- | Combine two alternatives.

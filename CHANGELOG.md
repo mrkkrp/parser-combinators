@@ -1,6 +1,8 @@
 ## Parser combinators 0.3.0
 
-* Add the `skipCount` combinator.
+* Added the `skipCount` combinator.
+
+* Improved algorithmic efficiency of the `count'` combinator.
 
 ## Parser combinators 0.2.1
 
