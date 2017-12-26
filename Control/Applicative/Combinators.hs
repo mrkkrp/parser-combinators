@@ -155,8 +155,8 @@ count' m' n' p = go m' n'
   where
     go !m !n
       | n <= 0 || m > n = pure []
-      | m > 0           = (:) <$> p <*> go (m - 1) (n - 1)
-      | otherwise       = ((:) <$> p <*> go 0 (n - 1)) <|> pure []
+      | m > 0           = liftA2 (:) p (go (m - 1) (n - 1))
+      | otherwise       = liftA2 (:) p (go 0 (n - 1)) <|> pure []
 {-# INLINE count' #-}
 
 -- | Combine two alternatives.
@@ -189,7 +189,7 @@ endBy1 p sep = some (p <* sep)
 manyTill :: Alternative m => m a -> m end -> m [a]
 manyTill p end = go
   where
-    go = ([] <$ end) <|> ((:) <$> p <*> go)
+    go = ([] <$ end) <|> liftA2 (:) p go
 {-# INLINE manyTill #-}
 
 -- | @'someTill' p end@ works similarly to @'manyTill' p end@, but @p@
@@ -198,7 +198,7 @@ manyTill p end = go
 -- See also: 'skipSome', 'skipSomeTill'.
 
 someTill :: Alternative m => m a -> m end -> m [a]
-someTill p end = (:) <$> p <*> manyTill p end
+someTill p end = liftA2 (:) p (manyTill p end)
 {-# INLINE someTill #-}
 
 -- | @'option' x p@ tries to apply the parser @p@. If @p@ fails without
@@ -226,7 +226,7 @@ sepBy p sep = sepBy1 p sep <|> pure []
 -- @sep@. Returns a list of values returned by @p@.
 
 sepBy1 :: Alternative m => m a -> m sep -> m [a]
-sepBy1 p sep = (:) <$> p <*> many (sep *> p)
+sepBy1 p sep = liftA2 (:) p (many (sep *> p))
 {-# INLINE sepBy1 #-}
 
 -- | @'sepEndBy' p sep@ parses /zero/ or more occurrences of @p@, separated
@@ -240,7 +240,7 @@ sepEndBy p sep = sepEndBy1 p sep <|> pure []
 -- and optionally ended by @sep@. Returns a list of values returned by @p@.
 
 sepEndBy1 :: Alternative m => m a -> m sep -> m [a]
-sepEndBy1 p sep = (:) <$> p <*> ((sep *> sepEndBy p sep) <|> pure [])
+sepEndBy1 p sep = liftA2 (:) p ((sep *> sepEndBy p sep) <|> pure [])
 {-# INLINEABLE sepEndBy1 #-}
 
 -- | @'skipMany' p@ applies the parser @p@ /zero/ or more times, skipping
