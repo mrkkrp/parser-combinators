@@ -271,9 +271,3 @@ spec = do
       if n == 0
         then prs_ p s `shouldFailWith` err posI (utok a <> etok c)
         else prs_ p s `shouldParse` a
-
-----------------------------------------------------------------------------
--- Helpers
-
-g :: Int -> Int
-g x = x + if x > 0 then x - 1 else 0

@@ -3,7 +3,8 @@ module Test.Util
   , prs
   , prs_
   , abcRow
-  , rightOrder )
+  , rightOrder
+  , g )
 where
 
 import Data.Void
@@ -52,3 +53,6 @@ rightOrder
 rightOrder p s s' =
   it "produces the list in the right order" $
     prs_ p s `shouldParse` s'
+
+g :: Int -> Int
+g x = x + if x > 0 then x - 1 else 0
