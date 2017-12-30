@@ -7,8 +7,8 @@
 -- Stability   :  experimental
 -- Portability :  portable
 --
--- This module provides 'NonEmpty' list variants of some of the functions in
--- "Control.Applicative.Combinators".
+-- The module provides 'NonEmpty' list variants of some of the functions
+-- from "Control.Applicative.Combinators".
 --
 -- @since 0.2.0
 
@@ -26,7 +26,7 @@ import qualified Control.Applicative.Combinators as C
 import qualified Data.List.NonEmpty              as NE
 
 -- | @'some' p@ applies the parser @p@ /one/ or more times and returns a
--- list of the returned values of @p@.
+-- list of the values returned by @p@.
 --
 -- > word = some letter
 

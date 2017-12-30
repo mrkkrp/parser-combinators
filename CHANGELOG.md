@@ -1,3 +1,10 @@
+## Parser combinators 0.4.0
+
+* Improved the documentation.
+
+* Re-exported `Control.Applicative.empty` from
+  `Control.Applicative.Combinators`.
+
 ## Parser combinators 0.3.0
 
 * Added the `skipCount` combinator.
