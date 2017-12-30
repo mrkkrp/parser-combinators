@@ -2,10 +2,13 @@ module Test.Util
   ( Parser
   , prs
   , prs_
-  , abcRow )
+  , abcRow
+  , rightOrder )
 where
 
 import Data.Void
+import Test.Hspec (Spec, it)
+import Test.Hspec.Megaparsec (shouldParse)
 import Text.Megaparsec
 
 -- | The type of parser that consumes a 'String'.
@@ -38,3 +41,14 @@ prs_ p = parse (p <* eof) ""
 
 abcRow :: Int -> Int -> Int -> String
 abcRow a b c = replicate a 'a' ++ replicate b 'b' ++ replicate c 'c'
+
+-- | Check that the given parser returns the list in the right order.
+
+rightOrder
+  :: Parser String     -- ^ The parser to test
+  -> String            -- ^ Input for the parser
+  -> String            -- ^ Expected result
+  -> Spec
+rightOrder p s s' =
+  it "produces the list in the right order" $
+    prs_ p s `shouldParse` s'
