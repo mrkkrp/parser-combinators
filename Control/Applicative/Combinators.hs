@@ -125,6 +125,8 @@ import Data.Traversable (sequenceA)
 --
 -- This parser fails unconditionally without providing any information about
 -- the cause of the failure.
+--
+-- @since 0.4.0
 
 ----------------------------------------------------------------------------
 -- Original combinators
