@@ -32,9 +32,13 @@ install:
  - cabal install --only-dependencies --enable-tests
 
 script:
- - cabal configure -v2 -f dev
+ - case "$GHCVER" in
+     "7.4.2") cabal configure -v2 -f dev ;;
+     "7.6.3") cabal configure -v2 -f dev ;;
+     *) cabal configure --enable-tests --enable-coverage -v2 -f dev ;;
+   esac
  - cabal build
- - cabal test --show-details=always
+ - cabal test --show-details=always --test-option=--qc-max-success=1000
  - cabal sdist
  - case "$GHCVER" in
      "7.4.2") true ;;
