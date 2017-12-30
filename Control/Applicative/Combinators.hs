@@ -12,6 +12,16 @@
 -- commonly used in parsing from "Control.Applicative" with additional
 -- parsing-related comments added.
 --
+-- Due to the nature of the 'Applicative' and 'Alternative' abstractions,
+-- they are prone to memory leaks and not as efficient as their monadic
+-- counterparts. Although all the combinators we provide in this module are
+-- perfectly expressible in terms of 'Applicative' and 'Alternative', please
+-- prefer "Control.Monad.Combinators" instead when possible.
+--
+-- If you wish that the combinators that cannot return empty lists return
+-- values of the 'Data.List.NonEmpty.NonEmpty' data type, use the
+-- "Control.Applicative.Combinators.NonEmpty" module.
+--
 -- === A note on backtracking
 --
 -- Certain parsing libraries, such as Megaparsec, do not backtrack every
@@ -24,10 +34,10 @@
 -- cannot know anything about inner workings of any concrete parsing
 -- library, and so they cannot use @try@.
 --
--- An essential feature of the 'Alternative' type class is the @('<|>')@
+-- The essential feature of the 'Alternative' type class is the @('<|>')@
 -- operator that allows to express choice. In libraries that do not
 -- backtrack everything automatically, the choice operator and everything
--- that is build on top of it require the parser of the left hand side to
+-- that is build on top of it require the parser on the left hand side to
 -- backtrack in order for the alternative branch of parsing to be tried.
 -- Thus it is the responsibility of the programmer to wrap more complex,
 -- composite parsers in @try@ to achieve correct behavior.
@@ -45,6 +55,8 @@ module Control.Applicative.Combinators
     -- $some
   , optional
     -- $optional
+  , empty
+    -- $empty
 
     -- * Original combinators
   , between
@@ -89,14 +101,14 @@ import Data.Traversable (sequenceA)
 -- $many
 --
 -- @'many' p@ applies the parser @p@ /zero/ or more times and returns a list
--- of the returned values of @p@.
+-- of the values returned by @p@.
 --
 -- > identifier = (:) <$> letter <*> many (alphaNumChar <|> char '_')
 
 -- $some
 --
 -- @'some' p@ applies the parser @p@ /one/ or more times and returns a list
--- of the returned values of @p@.
+-- of the values returned by @p@.
 --
 -- > word = some letter
 
@@ -108,6 +120,11 @@ import Data.Traversable (sequenceA)
 -- returned.
 --
 -- See also: 'option'.
+
+-- $empty
+--
+-- This parser fails unconditionally without providing any information about
+-- the cause of the failure.
 
 ----------------------------------------------------------------------------
 -- Original combinators
@@ -123,13 +140,18 @@ between open close p = open *> p <* close
 
 -- | @'choice' ps@ tries to apply the parsers in the list @ps@ in order,
 -- until one of them succeeds. Returns the value of the succeeding parser.
+--
+-- > choice = asum
 
 choice :: (Foldable f, Alternative m) => f (m a) -> m a
 choice = asum
 {-# INLINE choice #-}
 
 -- | @'count' n p@ parses @n@ occurrences of @p@. If @n@ is smaller or equal
--- to zero, the parser equals to @'pure' []@. Returns a list of @n@ values.
+-- to zero, the parser equals to @'pure' []@. Returns a list of @n@ parsed
+-- values.
+--
+-- > count = replicateM
 --
 -- See also: 'skipCount', 'count''.
 
@@ -148,7 +170,7 @@ count n p = sequenceA (replicate n p)
 -- Please note that @m@ /may/ be negative, in this case effect is the same
 -- as if it were equal to zero.
 --
--- See also: 'count'.
+-- See also: 'skipCount', 'count'.
 
 count' :: Alternative m => Int -> Int -> m a -> m [a]
 count' m' n' p = go m' n'
@@ -160,6 +182,8 @@ count' m' n' p = go m' n'
 {-# INLINE count' #-}
 
 -- | Combine two alternatives.
+--
+-- > eitherP a b = (Left <$> a) <|> (Right <$> b)
 
 eitherP :: Alternative m => m a -> m b -> m (Either a b)
 eitherP a b = (Left <$> a) <|> (Right <$> b)
@@ -205,7 +229,7 @@ someTill p end = liftA2 (:) p (manyTill p end)
 -- consuming input, it returns the value @x@, otherwise the value returned
 -- by @p@.
 --
--- > priority = option 0 (digitToInt <$> digitChar)
+-- > option x p = p <|> pure x
 --
 -- See also: 'optional'.
 
@@ -263,9 +287,11 @@ skipSome :: Alternative m => m a -> m ()
 skipSome p = p *> skipMany p
 {-# INLINE skipSome #-}
 
--- | @'skipCount' n p@ parses @n@ occurrences of @p@, skipping its result. If
--- @n@ is smaller or equal to zero, the parser equals to @'pure' []@. Returns a
--- list of @n@ values.
+-- | @'skipCount' n p@ parses @n@ occurrences of @p@, skipping its result.
+-- If @n@ is not positive, the parser equals to @'pure' []@. Returns a list
+-- of @n@ values.
+--
+-- > skipCount = replicateM_
 --
 -- See also: 'count', 'count''.
 --

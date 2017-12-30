@@ -1,3 +1,15 @@
+## Parser combinators 0.4.0
+
+* Improved the documentation.
+
+* Re-exported `Control.Applicative.empty` from
+  `Control.Applicative.Combinators`.
+
+* Added the `Control.Monad.Combinators` and
+  `Control.Monad.Combinators.NonEmpty` modules which contain more efficient
+  versions of the combinators from `Control.Applicative.Combinators` and
+  `Control.Applicative.Combinators.NonEmpty` respectively.
+
 ## Parser combinators 0.3.0
 
 * Added the `skipCount` combinator.
