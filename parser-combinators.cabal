@@ -40,3 +40,22 @@ library
   else
     ghc-options:      -O2 -Wall
   default-language:   Haskell2010
+
+test-suite tests
+  main-is:            Spec.hs
+  hs-source-dirs:     tests
+  type:               exitcode-stdio-1.0
+  build-depends:      QuickCheck       >= 2.7 && < 2.11
+                    , base             >= 4.7 && < 5.0
+                    , hspec            >= 2.0 && < 3.0
+                    , hspec-megaparsec >= 1.0 && < 2.0
+                    , megaparsec       >= 6.0 && < 7.0
+                    , parser-combinators
+  if flag(dev)
+    ghc-options:      -Wall -Werror
+  else
+    ghc-options:      -O2 -Wall
+  other-modules:      Control.Applicative.CombinatorsSpec
+                    , Control.Monad.CombinatorsSpec
+                    , Test.Util
+  default-language:   Haskell2010
