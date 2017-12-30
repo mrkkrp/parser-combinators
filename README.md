@@ -7,8 +7,10 @@
 [![Build Status](https://travis-ci.org/mrkkrp/parser-combinators.svg?branch=master)](https://travis-ci.org/mrkkrp/parser-combinators)
 
 The package provides common parser combinators defined in terms of
-`Applicative` and `Alternative` without any dependencies but `base`. Test
-suite and benchmarks can be found in the [Megaparsec repo](https://github.com/mrkkrp/megaparsec).
+`Applicative` and `Alternative` without any dependencies but `base`. There
+are also more efficient versions of the combinators defined in terms of
+`Monad` and `MonadPlus`. Test suite and benchmarks can be found in the
+[Megaparsec repo](https://github.com/mrkkrp/megaparsec).
 
 ## Contribution
 
