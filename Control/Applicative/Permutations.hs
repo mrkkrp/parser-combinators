@@ -13,12 +13,14 @@
 -- https://hackage.haskell.org/package/parsec-permutation
 --
 -- This module also takes inspiration from the algorithm is described in:
--- /Parsing Permutation Phrases/, by Arthur Baars, Andres Loh and Doaitse
--- Swierstra. Published as a functional pearl at the Haskell Workshop 2001.
+-- /Parsing Permutation Phrases/, by Arthur Baars, Andres Löh and Doaitse
+-- Swierstra. Published as a functional pearl at the Haskell Workshop 2001:
+--
+-- https://www.cs.ox.ac.uk/jeremy.gibbons/wg21/meeting56/loeh-paper.pdf
 --
 -- From these two works we derive a flexible and general method for parsing
 -- permutations over an 'Applicative' structure. Quite useful in conjunction
--- with \"Free\" constructions of Applicatives, Monads, etc.
+-- with \"Free\" constructions of 'Applicative's, 'Monad's, etc.
 --
 -- Other permutation parsing libraries tend towards using special \"almost
 -- applicative\" combinators for construction which denies the library user
