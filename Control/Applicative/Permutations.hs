@@ -38,14 +38,6 @@
 -- >               <*> toPermutation (char 'b')
 -- >               <*> toPermutationWithDefault '_' (char 'c')
 --
--- Equivalently, this can also be describe using the convenience operators
--- reminiscent of other parsing libraries:
---
--- > test = runPermutation $
--- >          (,,) <$?> ("", some (char 'a'))
--- >               <||> char 'b'
--- >               <|?> ('_', char 'c')
---
 -- @since 0.2.0
 
 module Control.Applicative.Permutations
@@ -56,12 +48,7 @@ module Control.Applicative.Permutations
   , intercalateEffect
     -- ** Permutation constructors
   , toPermutation
-  , toPermutationWithDefault
-    -- ** Convenience operators
-  , (<$$>)
-  , (<$?>)
-  , (<||>)
-  , (<|?>) )
+  , toPermutationWithDefault )
 where
 
 import Control.Applicative
@@ -95,26 +82,29 @@ runPermutation (P value parser) = optional parser >>= f
 -- | \"Unlifts\" a permutation parser into a parser to be evaluated with an
 -- intercalated effect. Useful for separators between permutation elements.
 --
--- For example, suppose that similar to above we want to parse a permutation of:
--- an optional string of @a@'s, the character @b@ and an optional @c@. /However/,
--- we also want each element of the permutation to be separated by a colon.
--- Using a standard parsing library combinator @char@, this can be described
--- using the 'Applicative' instance by:
+-- For example, suppose that similar to above we want to parse a permutation
+-- of: an optional string of @a@'s, the character @b@ and an optional @c@.
+-- /However/, we also want each element of the permutation to be separated
+-- by a colon. Using a standard parsing library combinator @char@, this can
+-- be described using the 'Applicative' instance by:
 --
 -- > test = intercalateEffect (char ':') $
--- >          (,,) <$?> ("", some (char 'a'))
--- >               <||> char 'b'
--- >               <|?> ('_', char 'c')
+-- >          (,,) <$> toPermutationWithDefault "" (some (char 'a'))
+-- >               <*> toPermutation (char 'b')
+-- >               <*> toPermutationWithDefault '_' (char 'c')
 --
--- This will accept strings such as: \"a:b:c\", \"b:c:a\", \"b:aa\", \"b\", etc.
+-- This will accept strings such as: \"a:b:c\", \"b:c:a\", \"b:aa\", \"b\",
+-- etc.
 --
--- Note that the effect is intercalated /between/ permutation components and that:
+-- Note that the effect is intercalated /between/ permutation components and
+-- that:
 --
---  - There is never an effect parsed preceeding the first component of the permutation
---
---  - There is never an effect parsed following the last component of the permutation
---
---  - No effects are intercalated between missing components with a default value.
+--     * There is never an effect parsed preceeding the first component of
+--       the permutation.
+--     * There is never an effect parsed following the last component of the
+--       permutation.
+--     * No effects are intercalated between missing components with a
+--       default value.
 
 intercalateEffect
   :: ( Alternative m
@@ -153,63 +143,3 @@ toPermutationWithDefault
   -> m a -- ^ Permutation component
   -> Permutation m a
 toPermutationWithDefault v p = P (Just v) $ pure <$> p
-
-infixl 1 <||>, <|?>
-infixl 2 <$$>, <$?>
-
--- | The expression @f \<$$> p@ creates a fresh permutation parser
--- consisting of parser @p@. The the final result of the permutation parser
--- is the function @f@ applied to the return value of @p@. The parser @p@ is
--- not allowed to accept empty input—use the optional combinator ('<$?>')
--- instead.
---
--- If the function @f@ takes more than one parameter, the type variable @b@
--- is instantiated to a functional type which combines nicely with the adds
--- parser @p@ to the ('<||>') combinator. This results in stylized code
--- where a permutation parser starts with a combining function @f@ followed
--- by the parsers. The function @f@ gets its parameters in the order in
--- which the parsers are specified, but actual input can be in any order.
-
-(<$$>)
-  :: Alternative m
-  => (a -> b)        -- ^ Function to use on result of parsing
-  -> m a             -- ^ Normal parser
-  -> Permutation m b -- ^ Permutation parser build from it
-f <$$> c = toPermutation $ f <$> c
-
--- | The expression @f \<$?> (x, p)@ creates a fresh permutation parser
--- consisting of parser @p@. The final result of the permutation parser is
--- the function @f@ applied to the return value of @p@. The parser @p@ is
--- optional—if it cannot be applied, the default value @x@ will be used
--- instead.
-
-(<$?>)
-  :: Alternative m
-  => (a -> b)        -- ^ Function to use on result of parsing
-  -> (a, m a)        -- ^ Default value and parser
-  -> Permutation m b -- ^ Permutation parser
-f <$?> (v,c) = f <$> toPermutationWithDefault v c
-
--- | The expression @perm \<||> p@ adds parser @p@ to the permutation parser
--- @perm@. The parser @p@ is not allowed to accept empty input—use the
--- optional combinator ('<|?>') instead. Returns a new permutation parser
--- that includes @p@.
-
-(<||>)
-  :: Alternative m
-  => Permutation m (a -> b) -- ^ Given permutation parser
-  -> m a                    -- ^ Parser to add (should not accept empty input)
-  -> Permutation m b        -- ^ Resulting parser
-p <||> c = p <*> toPermutation c
-
--- | The expression @perm \<||> (x, p)@ adds parser @p@ to the permutation
--- parser @perm@. The parser @p@ is optional—if it cannot be applied, the
--- default value @x@ will be used instead. Returns a new permutation parser
--- that includes the optional parser @p@.
-
-(<|?>)
-  :: Alternative m
-  => Permutation m (a -> b) -- ^ Given permutation parser
-  -> (a, m a)               -- ^ Default value and parser
-  -> Permutation m b        -- ^ Resulting parser
-p <|?> (v,c) = p <*> toPermutationWithDefault v c

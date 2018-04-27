@@ -2,6 +2,9 @@
 
 * Added the `Control.Monad.Combinators.Expr` module.
 
+* Dropped the compatibility operators `(<$$>)`, `(<$?>)`, `(<||>)`, and
+  `(<|?>)` from `Control.Applicative.Permutations`.
+
 * Dropped support for GHCs older than 7.10.
 
 ## Parser combinators 0.4.0
