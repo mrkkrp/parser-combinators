@@ -1,6 +1,8 @@
 ## Parser combinators 1.0.0
 
-* Drop support for GHCs older than 7.10.
+* Added the `Control.Monad.Combinators.Expr` module.
+
+* Dropped support for GHCs older than 7.10.
 
 ## Parser combinators 0.4.0
 
