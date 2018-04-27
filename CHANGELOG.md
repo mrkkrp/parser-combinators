@@ -1,3 +1,7 @@
+## Parser combinators 1.0.0
+
+* Drop support for GHCs older than 7.10.
+
 ## Parser combinators 0.4.0
 
 * Improved the documentation.
