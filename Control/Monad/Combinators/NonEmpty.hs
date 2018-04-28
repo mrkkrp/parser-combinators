@@ -31,14 +31,14 @@ import qualified Data.List.NonEmpty        as NE
 -- > word = some letter
 
 some :: MonadPlus m => m a -> m (NonEmpty a)
-some p = liftM NE.fromList (C.some p)
+some p = NE.fromList <$> C.some p
 {-# INLINE some #-}
 
 -- | @'endBy1' p sep@ parses /one/ or more occurrences of @p@, separated and
 -- ended by @sep@. Returns a non-empty list of values returned by @p@.
 
 endBy1 :: MonadPlus m => m a -> m sep -> m (NonEmpty a)
-endBy1 p sep = liftM NE.fromList (C.endBy1 p sep)
+endBy1 p sep = NE.fromList <$> C.endBy1 p sep
 {-# INLINE endBy1 #-}
 
 -- | @'someTill' p end@ works similarly to @'C.manyTill' p end@, but @p@
@@ -47,14 +47,14 @@ endBy1 p sep = liftM NE.fromList (C.endBy1 p sep)
 -- See also: 'C.skipSome', 'C.skipSomeTill'.
 
 someTill :: MonadPlus m => m a -> m end -> m (NonEmpty a)
-someTill p end = liftM NE.fromList (C.someTill p end)
+someTill p end = NE.fromList <$> C.someTill p end
 {-# INLINE someTill #-}
 
 -- | @'sepBy1' p sep@ parses /one/ or more occurrences of @p@, separated by
 -- @sep@. Returns a non-empty list of values returned by @p@.
 
 sepBy1 :: MonadPlus m => m a -> m sep -> m (NonEmpty a)
-sepBy1 p sep = liftM NE.fromList (C.sepBy1 p sep)
+sepBy1 p sep = NE.fromList <$> C.sepBy1 p sep
 {-# INLINE sepBy1 #-}
 
 -- | @'sepEndBy1' p sep@ parses /one/ or more occurrences of @p@, separated
@@ -62,5 +62,5 @@ sepBy1 p sep = liftM NE.fromList (C.sepBy1 p sep)
 -- @p@.
 
 sepEndBy1 :: MonadPlus m => m a -> m sep -> m (NonEmpty a)
-sepEndBy1 p sep = liftM NE.fromList (C.sepEndBy1 p sep)
+sepEndBy1 p sep = NE.fromList <$> C.sepEndBy1 p sep
 {-# INLINE sepEndBy1 #-}

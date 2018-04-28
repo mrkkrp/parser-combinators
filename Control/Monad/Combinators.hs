@@ -88,7 +88,7 @@ import qualified Control.Applicative.Combinators as C
 -- See also: 'skipCount', 'count''.
 
 count :: Monad m => Int -> m a -> m [a]
-count n' p = liftM ($ []) (go id n')
+count n' p = ($ []) <$> go id n'
   where
     go f !n =
       if n <= 0
@@ -110,7 +110,7 @@ count n' p = liftM ($ []) (go id n')
 count' :: MonadPlus m => Int -> Int -> m a -> m [a]
 count' m' n' p =
   if n' > 0 && n' >= m'
-    then liftM ($ []) (gom id m')
+    then ($ []) <$> gom id m'
     else return []
   where
     gom f !m =
@@ -151,7 +151,7 @@ endBy1 p sep = some (p >>= \x -> re x sep)
 -- > identifier = (:) <$> letter <*> many (alphaNumChar <|> char '_')
 
 many :: MonadPlus m => m a -> m [a]
-many p = liftM ($ []) (go id)
+many p = ($ []) <$> go id
   where
     go f = do
       r <- optional p
@@ -166,7 +166,7 @@ many p = liftM ($ []) (go id)
 -- See also: 'skipMany', 'skipManyTill'.
 
 manyTill :: MonadPlus m => m a -> m end -> m [a]
-manyTill p end = liftM ($ []) (go id)
+manyTill p end = ($ []) <$> go id
   where
     go f = do
       done <- option False (re True end)
@@ -205,7 +205,7 @@ sepBy p sep = do
   r <- optional p
   case r of
     Nothing -> return []
-    Just  x -> liftM (x:) (many (sep >> p))
+    Just  x -> (x:) <$> many (sep >> p)
 {-# INLINE sepBy #-}
 
 -- | @'sepBy1' p sep@ parses /one/ or more occurrences of @p@, separated by
@@ -214,14 +214,14 @@ sepBy p sep = do
 sepBy1 :: MonadPlus m => m a -> m sep -> m [a]
 sepBy1 p sep = do
   x <- p
-  liftM (x:) (many (sep >> p))
+  (x:) <$> many (sep >> p)
 {-# INLINE sepBy1 #-}
 
 -- | @'sepEndBy' p sep@ parses /zero/ or more occurrences of @p@, separated
 -- and optionally ended by @sep@. Returns a list of values returned by @p@.
 
 sepEndBy :: MonadPlus m => m a -> m sep -> m [a]
-sepEndBy p sep = liftM ($ []) (go id)
+sepEndBy p sep = ($ []) <$> go id
   where
     go f = do
       r <- optional p
@@ -242,7 +242,7 @@ sepEndBy1 p sep = do
   x <- p
   more <- option False (re True sep)
   if more
-    then liftM (x:) (sepEndBy p sep)
+    then (x:) <$> sepEndBy p sep
     else return [x]
 {-# INLINE sepEndBy1 #-}
 
@@ -312,7 +312,7 @@ skipSomeTill p end = p >> skipManyTill p end
 -- Compat helpers (for older GHCs)
 
 re :: Monad m => a -> m b -> m a
-re x = liftM (const x)
+re x = fmap (const x)
 {-# INLINE re #-}
 
 option :: MonadPlus m => a -> m a -> m a
@@ -320,5 +320,5 @@ option x p = p `mplus` return x
 {-# INLINE option #-}
 
 optional :: MonadPlus m => m a -> m (Maybe a)
-optional p = liftM Just p `mplus` return Nothing
+optional p = fmap Just p `mplus` return Nothing
 {-# INLINE optional #-}
