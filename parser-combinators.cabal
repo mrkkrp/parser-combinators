@@ -5,6 +5,7 @@ tested-with:          GHC==7.10.3, GHC==8.0.2, GHC==8.2.2, GHC==8.4.2
 license:              BSD3
 license-file:         LICENSE.md
 author:               Mark Karpov <markkarpov92@gmail.com>
+                      Alex Washburn <github@recursion.ninja>
 maintainer:           Mark Karpov <markkarpov92@gmail.com>
 homepage:             https://github.com/mrkkrp/parser-combinators
 bug-reports:          https://github.com/mrkkrp/parser-combinators/issues
