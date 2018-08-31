@@ -151,12 +151,12 @@ endBy1 p sep = some (p >>= \x -> re x sep)
 -- > identifier = (:) <$> letter <*> many (alphaNumChar <|> char '_')
 
 many :: MonadPlus m => m a -> m [a]
-many p = ($ []) <$> go id
+many p = go id
   where
     go f = do
       r <- optional p
       case r of
-        Nothing -> return f
+        Nothing -> return (f [])
         Just  x -> go (f . (x:))
 {-# INLINE many #-}
 
@@ -166,12 +166,12 @@ many p = ($ []) <$> go id
 -- See also: 'skipMany', 'skipManyTill'.
 
 manyTill :: MonadPlus m => m a -> m end -> m [a]
-manyTill p end = ($ []) <$> go id
+manyTill p end = go id
   where
     go f = do
       done <- option False (re True end)
       if done
-        then return f
+        then return (f [])
         else do
           x <- p
           go (f . (x:))
@@ -221,17 +221,17 @@ sepBy1 p sep = do
 -- and optionally ended by @sep@. Returns a list of values returned by @p@.
 
 sepEndBy :: MonadPlus m => m a -> m sep -> m [a]
-sepEndBy p sep = ($ []) <$> go id
+sepEndBy p sep = go id
   where
     go f = do
       r <- optional p
       case r of
-        Nothing -> return f
+        Nothing -> return (f [])
         Just  x -> do
           more <- option False (re True sep)
           if more
             then go (f . (x:))
-            else return (f . (x:))
+            else return (f [x])
 {-# INLINE sepEndBy #-}
 
 -- | @'sepEndBy1' p sep@ parses /one/ or more occurrences of @p@, separated
