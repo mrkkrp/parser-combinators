@@ -85,8 +85,6 @@ import Data.Foldable
 
 #if MIN_VERSION_base(4,9,0)
 import Control.Monad (replicateM, replicateM_)
-#elif !MIN_VERSION_base(4,8,0)
-import Data.Traversable (sequenceA)
 #endif
 
 ----------------------------------------------------------------------------

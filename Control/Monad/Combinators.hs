@@ -17,7 +17,6 @@
 -- @since 0.4.0
 
 {-# LANGUAGE BangPatterns #-}
-{-# LANGUAGE CPP          #-}
 
 module Control.Monad.Combinators
   ( -- * Re-exports from "Control.Applicative"
