@@ -87,11 +87,11 @@ import qualified Control.Applicative.Combinators as C
 -- See also: 'skipCount', 'count''.
 
 count :: Monad m => Int -> m a -> m [a]
-count n' p = ($ []) <$> go id n'
+count n' p = go id n'
   where
     go f !n =
       if n <= 0
-        then return f
+        then return (f [])
         else do
           x <- p
           go (f . (x:)) (n - 1)
@@ -109,7 +109,7 @@ count n' p = ($ []) <$> go id n'
 count' :: MonadPlus m => Int -> Int -> m a -> m [a]
 count' m' n' p =
   if n' > 0 && n' >= m'
-    then ($ []) <$> gom id m'
+    then gom id m'
     else return []
   where
     gom f !m =
@@ -123,9 +123,9 @@ count' m' n' p =
         then do
           r <- optional p
           case r of
-            Nothing -> return f
+            Nothing -> return (f [])
             Just  x -> god (f . (x:)) (d - 1)
-        else return f
+        else return (f [])
 {-# INLINE count' #-}
 
 -- | @'endBy' p sep@ parses /zero/ or more occurrences of @p@, separated and
