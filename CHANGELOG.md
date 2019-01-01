@@ -1,3 +1,7 @@
+## Parser combinators 1.0.1
+
+* Cosmetic changes in the source code.
+
 ## Parser combinators 1.0.0
 
 * Added the `Control.Monad.Combinators.Expr` module.
