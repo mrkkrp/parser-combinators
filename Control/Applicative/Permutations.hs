@@ -55,7 +55,7 @@ import Control.Applicative
 
 -- | An 'Applicative' wrapper-type for constructing permutation parsers.
 
-data Permutation m a = P (Maybe a) (m (Permutation m a))
+data Permutation m a = P !(Maybe a) (m (Permutation m a))
 
 instance Functor m => Functor (Permutation m) where
   fmap f (P v p) = P (f <$> v) (fmap f <$> p)
