@@ -1,3 +1,10 @@
+## Parser combinators 1.0.2
+
+* Defined `liftA2` for `Permutation` manually. The new definition should be
+  more efficient.
+
+* Made inner `Maybe` field in `Permutation` strict.
+
 ## Parser combinators 1.0.1
 
 * Cosmetic changes in the source code.
