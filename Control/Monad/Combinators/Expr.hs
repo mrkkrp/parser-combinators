@@ -30,6 +30,18 @@ data Operator m a
   | InfixR  (m (a -> a -> a)) -- ^ Right-associative infix
   | Prefix  (m (a -> a))      -- ^ Prefix
   | Postfix (m (a -> a))      -- ^ Postfix
+  | TernR   (m (m (a -> a -> a -> a)))
+    -- ^ Right-associative ternary. Right-associative means that
+    -- @a ? b : d ? e : f@ parsed as
+    -- @a ? b : (d ? e : f)@ and not as @(a ? b : d) ? e : f@.
+    --
+    -- The outer monadic action parses the first separator (e.g. @?@) and
+    -- returns an action (of type @m (a -> a -> a -> a)@) that parses the
+    -- second separator (e.g. @:@).
+    --
+    -- Example usage:
+    --
+    -- >>> TernR ((If <$ char ':') <$ char '?')
 
 -- | @'makeExprParser' term table@ builds an expression parser for terms
 -- @term@ with operators from @table@, taking the associativity and
@@ -89,13 +101,14 @@ makeExprParser = foldl addPrecLevel
 
 addPrecLevel :: MonadPlus m => m a -> [Operator m a] -> m a
 addPrecLevel term ops =
-  term' >>= \x -> choice [ras' x, las' x, nas' x, return x]
+  term' >>= \x -> choice [ras' x, las' x, nas' x, tern' x, return x]
   where
-    (ras, las, nas, prefix, postfix) = foldr splitOp ([],[],[],[],[]) ops
+    (ras, las, nas, prefix, postfix, tern) = foldr splitOp ([],[],[],[],[],[]) ops
     term' = pTerm (choice prefix) term (choice postfix)
     ras'  = pInfixR (choice ras) term'
     las'  = pInfixL (choice las) term'
     nas'  = pInfixN (choice nas) term'
+    tern' = pTernR  (choice tern) term'
 {-# INLINEABLE addPrecLevel #-}
 
 -- | @pTerm prefix term postfix@ parses a @term@ surrounded by optional
@@ -144,19 +157,33 @@ pInfixR op p x = do
   return $ f x y
 {-# INLINE pInfixR #-}
 
+-- | Parse the first separator of a ternary operator
+
+pTernR :: MonadPlus m => m (m (a -> a -> a -> a)) -> m a -> a -> m a
+pTernR sep1 p x = do
+  sep2 <- sep1
+  y <- p >>= \r -> pTernR sep1 p r `mplus` return r
+  f <- sep2
+  z <- p >>= \r -> pTernR sep1 p r `mplus` return r
+  return $ f x y z
+{-# INLINE pTernR #-}
+
 type Batch m a =
   ( [m (a -> a -> a)]
   , [m (a -> a -> a)]
   , [m (a -> a -> a)]
   , [m (a -> a)]
-  , [m (a -> a)] )
+  , [m (a -> a)]
+  , [m (m (a -> a -> a -> a))]
+  )
 
 -- | A helper to separate various operators (binary, unary, and according to
 -- associativity) and return them in a tuple.
 
 splitOp :: Operator m a -> Batch m a -> Batch m a
-splitOp (InfixR  op) (r, l, n, pre, post) = (op:r, l, n, pre, post)
-splitOp (InfixL  op) (r, l, n, pre, post) = (r, op:l, n, pre, post)
-splitOp (InfixN  op) (r, l, n, pre, post) = (r, l, op:n, pre, post)
-splitOp (Prefix  op) (r, l, n, pre, post) = (r, l, n, op:pre, post)
-splitOp (Postfix op) (r, l, n, pre, post) = (r, l, n, pre, op:post)
+splitOp (InfixR  op) (r, l, n, pre, post, tern) = (op:r, l, n, pre, post, tern)
+splitOp (InfixL  op) (r, l, n, pre, post, tern) = (r, op:l, n, pre, post, tern)
+splitOp (InfixN  op) (r, l, n, pre, post, tern) = (r, l, op:n, pre, post, tern)
+splitOp (Prefix  op) (r, l, n, pre, post, tern) = (r, l, n, op:pre, post, tern)
+splitOp (Postfix op) (r, l, n, pre, post, tern) = (r, l, n, pre, op:post, tern)
+splitOp (TernR   op) (r, l, n, pre, post, tern) = (r, l, n, pre, post, op:tern)
