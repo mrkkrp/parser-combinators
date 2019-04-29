@@ -1,0 +1,47 @@
+name:                 parser-combinators-tests
+version:              1.0.2
+cabal-version:        1.18
+tested-with:          GHC==8.0.2, GHC==8.2.2, GHC==8.4.4, GHC==8.6.5
+license:              BSD3
+license-file:         LICENSE.md
+author:               Mark Karpov <markkarpov92@gmail.com>
+maintainer:           Mark Karpov <markkarpov92@gmail.com>
+homepage:             https://github.com/mrkkrp/parser-combinators
+bug-reports:          https://github.com/mrkkrp/parser-combinators/issues
+category:             Parsing
+synopsis:             Test suite of parser-combinators
+build-type:           Simple
+description:          Test suite of parser-combinators.
+extra-doc-files:      README.md
+
+source-repository head
+  type:               git
+  location:           https://github.com/mrkkrp/parser-combinators.git
+
+flag dev
+  description:        Turn on development settings.
+  manual:             True
+  default:            False
+
+test-suite tests
+  main-is:            Spec.hs
+  hs-source-dirs:     tests
+  type:               exitcode-stdio-1.0
+  build-depends:      QuickCheck       >= 2.7 && < 2.13
+                    , base             >= 4.9 && < 5.0
+                    , hspec            >= 2.0 && < 3.0
+                    , hspec-expectations >= 0.8 && < 0.9
+                    , hspec-megaparsec >= 2.0 && < 3.0
+                    , megaparsec       >= 7.0 && < 8.0
+                    , megaparsec-tests >= 7.0 && < 8.0
+                    , parser-combinators == 1.0.2
+  other-modules:      Control.Applicative.CombinatorsSpec
+                    , Control.Applicative.PermutationsSpec
+                    , Control.Monad.Combinators.ExprSpec
+                    , Control.Monad.CombinatorsSpec
+  build-tools:        hspec-discover   >= 2.0 && < 3.0
+  if flag(dev)
+    ghc-options:      -Wall -Werror
+  else
+    ghc-options:      -O2 -Wall
+  default-language:   Haskell2010

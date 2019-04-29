@@ -27,9 +27,12 @@ install:
   - travis_retry cabal update
 
 script:
-  - cabal new-build --enable-tests --enable-benchmarks --flags=dev
-  - cabal new-haddock
+  - cabal new-build parser-combinators parser-combinators-tests --enable-tests --enable-benchmarks --flags=dev
+  - cabal new-test parser-combinators-tests
+  - cabal new-haddock parser-combinators
+  # - cabal new-haddock parser-combinators-tests
   - cabal sdist
+  - cd parser-combinators-tests && cabal sdist
 
 notifications:
   email: false

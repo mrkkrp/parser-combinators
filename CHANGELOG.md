@@ -2,6 +2,9 @@
 
 * Dropped support for GHC 7.10.
 
+* Added a test suite as a separate package called
+  `parser-combinators-tests`.
+
 ## Parser combinators 1.0.2
 
 * Defined `liftA2` for `Permutation` manually. The new definition should be
