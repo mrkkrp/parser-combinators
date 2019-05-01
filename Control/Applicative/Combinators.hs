@@ -43,7 +43,6 @@
 -- composite parsers in @try@ to achieve correct behavior.
 
 {-# LANGUAGE BangPatterns #-}
-{-# LANGUAGE CPP          #-}
 
 module Control.Applicative.Combinators
   ( -- * Re-exports from "Control.Applicative"
@@ -81,11 +80,8 @@ module Control.Applicative.Combinators
 where
 
 import Control.Applicative
-import Data.Foldable
-
-#if MIN_VERSION_base(4,9,0)
 import Control.Monad (replicateM, replicateM_)
-#endif
+import Data.Foldable
 
 ----------------------------------------------------------------------------
 -- Re-exports from "Control.Applicative"
@@ -156,11 +152,7 @@ choice = asum
 -- See also: 'skipCount', 'count''.
 
 count :: Applicative m => Int -> m a -> m [a]
-#if MIN_VERSION_base(4,9,0)
 count = replicateM
-#else
-count n p = sequenceA (replicate n p)
-#endif
 {-# INLINE count #-}
 
 -- | @'count'' m n p@ parses from @m@ to @n@ occurrences of @p@. If @n@ is
@@ -298,11 +290,7 @@ skipSome p = p *> skipMany p
 -- @since 0.3.0
 
 skipCount :: Applicative m => Int -> m a -> m ()
-#if MIN_VERSION_base(4,9,0)
 skipCount = replicateM_
-#else
-skipCount n p = sequenceA_ (replicate n p)
-#endif
 {-# INLINE skipCount #-}
 
 -- | @'skipManyTill' p end@ applies the parser @p@ /zero/ or more times
