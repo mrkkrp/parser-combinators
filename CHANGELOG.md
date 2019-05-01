@@ -1,3 +1,7 @@
+## Unreleased
+
+* Dropped support for GHC 7.10.
+
 ## Parser combinators 1.0.2
 
 * Defined `liftA2` for `Permutation` manually. The new definition should be

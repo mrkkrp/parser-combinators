@@ -1,7 +1,7 @@
 name:                 parser-combinators
 version:              1.0.2
 cabal-version:        1.18
-tested-with:          GHC==7.10.3, GHC==8.0.2, GHC==8.2.2, GHC==8.4.4, GHC==8.6.5
+tested-with:          GHC==8.0.2, GHC==8.2.2, GHC==8.4.4, GHC==8.6.5
 license:              BSD3
 license-file:         LICENSE.md
 author:               Mark Karpov <markkarpov92@gmail.com>
@@ -26,11 +26,7 @@ flag dev
   default:            False
 
 library
-  build-depends:      base             >= 4.8 && < 5.0
-
-  if !impl(ghc >= 8.0)
-    build-depends:    semigroups == 0.18.*
-
+  build-depends:      base             >= 4.9 && < 5.0
   exposed-modules:    Control.Applicative.Combinators
                     , Control.Applicative.Combinators.NonEmpty
                     , Control.Applicative.Permutations
@@ -41,7 +37,7 @@ library
     ghc-options:      -Wall -Werror
   else
     ghc-options:      -O2 -Wall
-  if flag(dev) && impl(ghc >= 8.0)
+  if flag(dev)
     ghc-options:      -Wcompat
                       -Wincomplete-record-updates
                       -Wincomplete-uni-patterns
