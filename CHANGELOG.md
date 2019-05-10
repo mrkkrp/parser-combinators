@@ -1,4 +1,4 @@
-## Unreleased
+## Parser combinators 1.0.3
 
 * Dropped support for GHC 7.10.
 
