@@ -34,7 +34,7 @@ test-suite tests
                     , hspec-megaparsec >= 2.0 && < 3.0
                     , megaparsec       >= 7.0 && < 8.0
                     , megaparsec-tests >= 7.0 && < 8.0
-                    , parser-combinators == 1.0.2
+                    , parser-combinators == 1.0.3
   other-modules:      Control.Applicative.CombinatorsSpec
                     , Control.Applicative.PermutationsSpec
                     , Control.Monad.Combinators.ExprSpec
