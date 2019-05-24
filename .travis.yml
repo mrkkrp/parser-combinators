@@ -28,7 +28,7 @@ install:
 
 script:
   - cabal new-build parser-combinators parser-combinators-tests --enable-tests --enable-benchmarks --flags=dev
-  - cabal new-test parser-combinators-tests
+  - cabal new-test parser-combinators-tests --enable-tests --enable-benchmarks --flags=dev
   - cabal new-haddock parser-combinators
   # - cabal new-haddock parser-combinators-tests
   - cabal sdist
