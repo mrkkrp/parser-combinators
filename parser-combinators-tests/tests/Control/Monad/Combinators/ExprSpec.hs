@@ -3,6 +3,7 @@
 
 module Control.Monad.Combinators.ExprSpec (spec) where
 
+import Control.Monad
 import Control.Monad.Combinators.Expr
 import Data.Monoid ((<>))
 import Test.Hspec
@@ -51,6 +52,7 @@ spec =
                    , etok '+'
                    , etok '-'
                    , etok '/'
+                   , etok '?'
                    , etok '^'
                    ])
 
@@ -64,6 +66,7 @@ data Node
   | Pro Node Node -- ^ product
   | Div Node Node -- ^ division
   | Exp Node Node -- ^ exponentiation
+  | If Node Node Node -- ^ ternary conditional operator
     deriving (Eq, Show)
 
 instance Enum Node where
@@ -76,6 +79,7 @@ instance Enum Node where
   fromEnum (Div _ _) = 2
   fromEnum (Sum _ _) = 3
   fromEnum (Sub _ _) = 3
+  fromEnum (If _ _ _ ) = 4
   toEnum   _         = error "Oops!"
 
 instance Ord Node where
@@ -91,6 +95,7 @@ showNode n@(Sub x y) = showGT n x ++ " - " ++ showGE n y
 showNode n@(Pro x y) = showGT n x ++ " * " ++ showGE n y
 showNode n@(Div x y) = showGT n x ++ " / " ++ showGE n y
 showNode n@(Exp x y) = showGE n x ++ " ^ " ++ showGT n y
+showNode n@(If c x y) = showGE n c ++ " ? " ++ showGT n x ++ " : " ++ showGT n y
 
 showGT :: Node -> Node -> String
 showGT parent node = (if node > parent then showCmp else showNode) node
@@ -121,7 +126,15 @@ arbitraryN1 n =
 
 arbitraryN2 :: Int -> Gen Node
 arbitraryN2 0 = Val . getNonNegative <$> arbitrary
-arbitraryN2 n = elements [Sum,Sub,Pro,Div,Exp] <*> leaf <*> leaf
+arbitraryN2 n =
+  (join . elements)
+    [ pure Sum
+    , pure Sub
+    , pure Pro
+    , pure Div
+    , pure Exp
+    , If <$> leaf
+    ] <*> leaf <*> leaf
   where
     leaf = arbitraryN0 (n `div` 2)
 
@@ -157,4 +170,6 @@ table =
   , [ InfixL  (Pro <$ symbol "*")
     , InfixL  (Div <$ symbol "/") ]
   , [ InfixL  (Sum <$ symbol "+")
-    , InfixL  (Sub <$ symbol "-")] ]
+    , InfixL  (Sub <$ symbol "-") ]
+  , [ TernR   ((If <$ symbol ":") <$ symbol "?") ]
+  ]
