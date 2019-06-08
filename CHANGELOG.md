@@ -1,12 +1,14 @@
+## Parser combinators 1.1.0
+
+* Added support for ternary operators; see `TernR` in
+    `Control.Monad.Combinators.Expr`.
+
 ## Parser combinators 1.0.3
 
 * Dropped support for GHC 7.10.
 
 * Added a test suite as a separate package called
   `parser-combinators-tests`.
-
-* Added support for ternary operators; see `TernR` in
-    `Control.Monad.Combinators.Expr`.
 
 ## Parser combinators 1.0.2
 
