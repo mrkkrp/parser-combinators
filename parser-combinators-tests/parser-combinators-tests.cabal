@@ -27,7 +27,7 @@ test-suite tests
   main-is:            Spec.hs
   hs-source-dirs:     tests
   type:               exitcode-stdio-1.0
-  build-depends:      QuickCheck       >= 2.7 && < 2.13
+  build-depends:      QuickCheck       >= 2.7 && < 2.14
                     , base             >= 4.9 && < 5.0
                     , hspec            >= 2.0 && < 3.0
                     , hspec-expectations >= 0.8 && < 0.9
