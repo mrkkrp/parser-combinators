@@ -1,7 +1,7 @@
 name:                 parser-combinators
 version:              1.1.0
 cabal-version:        1.18
-tested-with:          GHC==8.0.2, GHC==8.2.2, GHC==8.4.4, GHC==8.6.5
+tested-with:          GHC==8.2.2, GHC==8.4.4, GHC==8.6.5
 license:              BSD3
 license-file:         LICENSE.md
 author:               Mark Karpov <markkarpov92@gmail.com>
@@ -26,7 +26,7 @@ flag dev
   default:            False
 
 library
-  build-depends:      base             >= 4.9 && < 5.0
+  build-depends:      base             >= 4.10 && < 5.0
   exposed-modules:    Control.Applicative.Combinators
                     , Control.Applicative.Combinators.NonEmpty
                     , Control.Applicative.Permutations

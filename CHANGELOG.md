@@ -1,7 +1,11 @@
+## Unreleased
+
+* Dropped support for GHC 8.0.
+
 ## Parser combinators 1.1.0
 
 * Added support for ternary operators; see `TernR` in
-    `Control.Monad.Combinators.Expr`.
+  `Control.Monad.Combinators.Expr`.
 
 ## Parser combinators 1.0.3
 
