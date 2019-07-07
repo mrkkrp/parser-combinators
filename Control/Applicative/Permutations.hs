@@ -1,6 +1,6 @@
 -- |
 -- Module      :  Control.Applicative.Permutations
--- Copyright   :  © 2017–2019 Alex Washburn
+-- Copyright   :  © 2017–present Alex Washburn
 -- License     :  BSD 3 clause
 --
 -- Maintainer  :  Mark Karpov <markkarpov92@gmail.com>
