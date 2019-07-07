@@ -40,8 +40,6 @@
 --
 -- @since 0.2.0
 
-{-# LANGUAGE CPP #-}
-
 module Control.Applicative.Permutations
   ( -- ** Permutation type
     Permutation
@@ -68,12 +66,10 @@ instance Alternative m => Applicative (Permutation m) where
     where
       lhsAlt = (<*> rhs) <$> v
       rhsAlt = (lhs <*>) <$> w
-#if MIN_VERSION_base(4,10,0)
   liftA2 f lhs@(P x v) rhs@(P y w) = P (liftA2 f x y) (lhsAlt <|> rhsAlt)
     where
       lhsAlt = (\p -> liftA2 f p rhs) <$> v
       rhsAlt = liftA2 f lhs <$> w
-#endif
 
 -- | \"Unlifts\" a permutation parser into a parser to be evaluated.
 
