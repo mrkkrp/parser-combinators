@@ -121,7 +121,7 @@ count' m' n' p =
     god f !d =
       if d > 0
         then do
-          r <- optional p
+          r <- C.optional p
           case r of
             Nothing -> return (f [])
             Just  x -> god (f . (x:)) (d - 1)
@@ -134,14 +134,14 @@ count' m' n' p =
 -- > cStatements = cStatement `endBy` semicolon
 
 endBy :: MonadPlus m => m a -> m sep -> m [a]
-endBy p sep = many (p >>= \x -> re x sep)
+endBy p sep = many (p >>= \x -> x <$ sep)
 {-# INLINE endBy #-}
 
 -- | @'endBy1' p sep@ parses /one/ or more occurrences of @p@, separated and
 -- ended by @sep@. Returns a list of values returned by @p@.
 
 endBy1 :: MonadPlus m => m a -> m sep -> m [a]
-endBy1 p sep = some (p >>= \x -> re x sep)
+endBy1 p sep = some (p >>= \x -> x <$ sep)
 {-# INLINE endBy1 #-}
 
 -- | @'many' p@ applies the parser @p@ /zero/ or more times and returns a
@@ -153,7 +153,7 @@ many :: MonadPlus m => m a -> m [a]
 many p = go id
   where
     go f = do
-      r <- optional p
+      r <- C.optional p
       case r of
         Nothing -> return (f [])
         Just  x -> go (f . (x:))
@@ -168,7 +168,7 @@ manyTill :: MonadPlus m => m a -> m end -> m [a]
 manyTill p end = go id
   where
     go f = do
-      done <- option False (re True end)
+      done <- C.option False (True <$ end)
       if done
         then return (f [])
         else do
@@ -201,7 +201,7 @@ someTill p end = liftM2 (:) p (manyTill p end)
 
 sepBy :: MonadPlus m => m a -> m sep -> m [a]
 sepBy p sep = do
-  r <- optional p
+  r <- C.optional p
   case r of
     Nothing -> return []
     Just  x -> (x:) <$> many (sep >> p)
@@ -223,11 +223,11 @@ sepEndBy :: MonadPlus m => m a -> m sep -> m [a]
 sepEndBy p sep = go id
   where
     go f = do
-      r <- optional p
+      r <- C.optional p
       case r of
         Nothing -> return (f [])
         Just  x -> do
-          more <- option False (re True sep)
+          more <- C.option False (True <$ sep)
           if more
             then go (f . (x:))
             else return (f [x])
@@ -239,7 +239,7 @@ sepEndBy p sep = go id
 sepEndBy1 :: MonadPlus m => m a -> m sep -> m [a]
 sepEndBy1 p sep = do
   x <- p
-  more <- option False (re True sep)
+  more <- C.option False (True <$ sep)
   if more
     then (x:) <$> sepEndBy p sep
     else return [x]
@@ -254,7 +254,7 @@ skipMany :: MonadPlus m => m a -> m ()
 skipMany p = go
   where
     go = do
-      more <- option False (re True p)
+      more <- C.option False (True <$ p)
       when more go
 {-# INLINE skipMany #-}
 
@@ -291,7 +291,7 @@ skipManyTill :: MonadPlus m => m a -> m end -> m end
 skipManyTill p end = go
   where
     go = do
-      r <- optional end
+      r <- C.optional end
       case r of
         Nothing -> p >> go
         Just  x -> return x
@@ -306,18 +306,3 @@ skipManyTill p end = go
 skipSomeTill :: MonadPlus m => m a -> m end -> m end
 skipSomeTill p end = p >> skipManyTill p end
 {-# INLINE skipSomeTill #-}
-
-----------------------------------------------------------------------------
--- Compat helpers (for older GHCs)
-
-re :: Monad m => a -> m b -> m a
-re x = fmap (const x)
-{-# INLINE re #-}
-
-option :: MonadPlus m => a -> m a -> m a
-option x p = p `mplus` return x
-{-# INLINE option #-}
-
-optional :: MonadPlus m => m a -> m (Maybe a)
-optional p = fmap Just p `mplus` return Nothing
-{-# INLINE optional #-}
