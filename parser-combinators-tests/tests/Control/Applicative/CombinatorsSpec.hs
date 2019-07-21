@@ -129,6 +129,18 @@ spec = do
              in prs_ p s `shouldParse` (pre, drop 1 post)
     rightOrder (manyTill letterChar (char 'd')) "abcd" "abc"
 
+  describe "manyTill_" $ do
+    it "works" . property $ \a' b' c' -> do
+      let [a,b,c] = getNonNegative <$> [a',b',c']
+          p = (,) <$> manyTill_ letterChar (char 'c') <*> many letterChar
+          s = abcRow a b c
+      if c == 0
+        then prs_ p s `shouldFailWith` err (a + b)
+             (ueof <> etok 'c' <> elabel "letter")
+        else let (pre, post) = break (== 'c') s
+             in prs_ p s `shouldParse` ((pre, 'c'), drop 1 post)
+    rightOrder (fst <$> manyTill_ letterChar (char 'd')) "abcd" "abc"
+
   describe "someTill" $ do
     it "works" . property $ \a' b' c' -> do
       let [a,b,c] = getNonNegative <$> [a',b',c']
@@ -147,6 +159,25 @@ spec = do
            let (pre, post) = break (== 'c') s
            in prs_ p s `shouldParse` (pre, drop 1 post)
     rightOrder (someTill letterChar (char 'd')) "abcd" "abc"
+
+  describe "someTill_" $ do
+    it "works" . property $ \a' b' c' -> do
+      let [a,b,c] = getNonNegative <$> [a',b',c']
+          p = (,) <$> someTill_ letterChar (char 'c') <*> many letterChar
+          s = abcRow a b c
+      if | null s ->
+           prs_ p s `shouldFailWith` err 0 (ueof <> elabel "letter")
+         | c == 0 ->
+           prs_ p s `shouldFailWith` err (a + b)
+             (ueof <> etok 'c' <> elabel "letter")
+         | s == "c" ->
+           prs_ p s `shouldFailWith` err 1 (ueof <> etok 'c' <> elabel "letter")
+         | head s == 'c' ->
+           prs_ p s `shouldParse` (("c", 'c'), drop 2 s)
+         | otherwise ->
+           let (pre, post) = break (== 'c') s
+           in prs_ p s `shouldParse` ((pre, 'c'), drop 1 post)
+    rightOrder (fst <$> someTill_ letterChar (char 'd')) "abcd" "abc"
 
   describe "option" $
     it "works" . property $ \d a s -> do
