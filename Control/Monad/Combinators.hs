@@ -37,8 +37,10 @@ module Control.Monad.Combinators
   , endBy1
   , many
   , manyTill
+  , manyTill_
   , some
   , someTill
+  , someTill_
   , C.option
   , sepBy
   , sepBy1
@@ -160,21 +162,36 @@ many p = go id
 {-# INLINE many #-}
 
 -- | @'manyTill' p end@ applies parser @p@ /zero/ or more times until parser
--- @end@ succeeds. Returns the list of values returned by @p@.
+-- @end@ succeeds. Returns the list of values returned by @p@. __Note__ that
+-- @end@ result is consumed and lost. Use 'manyTill_' if you wish to keep
+-- it.
 --
 -- See also: 'skipMany', 'skipManyTill'.
 
 manyTill :: MonadPlus m => m a -> m end -> m [a]
-manyTill p end = go id
+manyTill p end = fst <$> manyTill_ p end
+{-# INLINE manyTill #-}
+
+-- | @'manyTill_' p end@ applies parser @p@ /zero/ or more times until
+-- parser @end@ succeeds. Returns the list of values returned by @p@ and the
+-- @end@ result. Use 'manyTill' if you have no need in the result of the
+-- @end@.
+--
+-- See also: 'skipMany', 'skipManyTill'.
+--
+-- @since 1.2.0
+
+manyTill_ :: MonadPlus m => m a -> m end -> m ([a], end)
+manyTill_ p end = go id
   where
     go f = do
-      done <- C.option False (True <$ end)
-      if done
-        then return (f [])
-        else do
+      done <- C.optional end
+      case done of
+        Just done' -> return (f [], done')
+        Nothing  -> do
           x <- p
           go (f . (x:))
-{-# INLINE manyTill #-}
+{-# INLINE manyTill_ #-}
 
 -- | @'some' p@ applies the parser @p@ /one/ or more times and returns a
 -- list of the values returned by @p@.
@@ -186,13 +203,26 @@ some p = liftM2 (:) p (many p)
 {-# INLINE some #-}
 
 -- | @'someTill' p end@ works similarly to @'manyTill' p end@, but @p@
--- should succeed at least once.
+-- should succeed at least once. __Note__ that @end@ result is consumed and
+-- lost. Use 'someTill_' if you wish to keep it.
 --
 -- See also: 'skipSome', 'skipSomeTill'.
 
 someTill :: MonadPlus m => m a -> m end -> m [a]
 someTill p end = liftM2 (:) p (manyTill p end)
 {-# INLINE someTill #-}
+
+-- | @'someTill_' p end@ works similarly to @'manyTill_' p end@, but @p@
+-- should succeed at least once. Use 'someTill' if you have no need in the
+-- result of the @end@.
+--
+-- See also: 'skipSome', 'skipSomeTill'.
+--
+-- @since 1.2.0
+
+someTill_ :: MonadPlus m => m a -> m end -> m ([a], end)
+someTill_ p end = liftM2 (\x (xs, y) -> (x:xs, y)) p (manyTill_ p end)
+{-# INLINE someTill_ #-}
 
 -- | @'sepBy' p sep@ parses /zero/ or more occurrences of @p@, separated by
 -- @sep@. Returns a list of values returned by @p@.

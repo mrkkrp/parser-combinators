@@ -1,4 +1,8 @@
-## Unreleased
+## Parser combinators 1.2.0
+
+* Added `manyTill_` and `someTill_` combinators which work like the older
+  `manyTill` and `someTill` except they also return the result of the `end`
+  parser.
 
 * Dropped support for GHC 8.0.
 
