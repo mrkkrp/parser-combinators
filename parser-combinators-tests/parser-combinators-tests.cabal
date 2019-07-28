@@ -1,5 +1,5 @@
 name:                 parser-combinators-tests
-version:              1.1.0
+version:              1.2.0
 cabal-version:        1.18
 tested-with:          GHC==8.0.2, GHC==8.2.2, GHC==8.4.4, GHC==8.6.5
 license:              BSD3
@@ -34,7 +34,7 @@ test-suite tests
                     , hspec-megaparsec >= 2.0 && < 3.0
                     , megaparsec       >= 7.0 && < 8.0
                     , megaparsec-tests >= 7.0 && < 8.0
-                    , parser-combinators == 1.1.0
+                    , parser-combinators == 1.2.0
   other-modules:      Control.Applicative.CombinatorsSpec
                     , Control.Applicative.PermutationsSpec
                     , Control.Monad.Combinators.ExprSpec
