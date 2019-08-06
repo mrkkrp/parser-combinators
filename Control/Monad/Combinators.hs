@@ -206,6 +206,8 @@ some p = liftM2 (:) p (many p)
 -- should succeed at least once. __Note__ that @end@ result is consumed and
 -- lost. Use 'someTill_' if you wish to keep it.
 --
+-- > someTill p end = liftM2 (:) p (manyTill p end)
+--
 -- See also: 'skipSome', 'skipSomeTill'.
 
 someTill :: MonadPlus m => m a -> m end -> m [a]

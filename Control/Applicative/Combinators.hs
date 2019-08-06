@@ -231,6 +231,8 @@ manyTill_ p end = go
 -- should succeed at least once. @end@ result is consumed and lost. Use
 -- 'someTill_' if you wish to keep it.
 --
+-- > someTill p end = liftA2 (:) p (manyTill p end)
+--
 -- See also: 'skipSome', 'skipSomeTill'.
 
 someTill :: Alternative m => m a -> m end -> m [a]
