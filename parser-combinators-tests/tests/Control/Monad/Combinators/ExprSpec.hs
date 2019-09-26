@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP              #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TypeFamilies     #-}
 
@@ -5,13 +6,16 @@ module Control.Monad.Combinators.ExprSpec (spec) where
 
 import Control.Monad
 import Control.Monad.Combinators.Expr
-import Data.Monoid ((<>))
 import Test.Hspec
 import Test.Hspec.Megaparsec
 import Test.Hspec.Megaparsec.AdHoc
 import Test.QuickCheck
 import Text.Megaparsec
 import Text.Megaparsec.Char
+
+#if !MIN_VERSION_base(4,13,0)
+import Data.Semigroup ((<>))
+#endif
 
 spec :: Spec
 spec =
