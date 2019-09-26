@@ -1,3 +1,7 @@
+## Unreleased
+
+* Dropped support for GHC 8.2.
+
 ## Parser combinators 1.2.0
 
 * Added `manyTill_` and `someTill_` combinators which work like the older

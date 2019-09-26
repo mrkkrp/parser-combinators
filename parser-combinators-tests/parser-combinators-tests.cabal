@@ -1,7 +1,7 @@
 name:                 parser-combinators-tests
 version:              1.2.0
 cabal-version:        1.18
-tested-with:          GHC==8.0.2, GHC==8.2.2, GHC==8.4.4, GHC==8.6.5
+tested-with:          GHC==8.4.4, GHC==8.6.5, GHC==8.8.1
 license:              BSD3
 license-file:         LICENSE.md
 author:               Mark Karpov <markkarpov92@gmail.com>
@@ -28,7 +28,7 @@ test-suite tests
   hs-source-dirs:     tests
   type:               exitcode-stdio-1.0
   build-depends:      QuickCheck       >= 2.7 && < 2.14
-                    , base             >= 4.9 && < 5.0
+                    , base             >= 4.11 && < 5.0
                     , hspec            >= 2.0 && < 3.0
                     , hspec-expectations >= 0.8 && < 0.9
                     , hspec-megaparsec >= 2.0 && < 3.0

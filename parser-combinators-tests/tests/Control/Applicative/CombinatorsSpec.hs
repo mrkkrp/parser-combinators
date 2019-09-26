@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP        #-}
 {-# LANGUAGE MultiWayIf #-}
 
 module Control.Applicative.CombinatorsSpec (spec) where
@@ -12,10 +11,6 @@ import Test.Hspec.Megaparsec
 import Test.Hspec.Megaparsec.AdHoc
 import Test.QuickCheck
 import Text.Megaparsec.Char
-
-#if !MIN_VERSION_base(4,11,0)
-import Data.Monoid
-#endif
 
 spec :: Spec
 spec = do
