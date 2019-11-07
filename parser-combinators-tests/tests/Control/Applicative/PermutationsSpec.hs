@@ -91,7 +91,7 @@ prsp p = prs (runPermutation p)
 prsp'
   :: Permutation Parser a
   -> String
-  -> (State String, Either (ParseErrorBundle String Void) a)
+  -> (State String Void, Either (ParseErrorBundle String Void) a)
 prsp' p = prs' (runPermutation p)
 
 testPermParser :: Permutation Parser String
