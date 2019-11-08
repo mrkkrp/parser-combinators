@@ -1,4 +1,6 @@
-## Unreleased
+## Parser combinators 1.2.1
+
+* The tests in `parser-combinators-tests` now work with Megaparsec 8.
 
 * Dropped support for GHC 8.2.
 
