@@ -20,6 +20,14 @@ import Data.Semigroup ((<>))
 spec :: Spec
 spec =
   describe "makeExprParser" $ do
+    describe "explicit backtrack" $ do
+      let testCases =
+            [ ("1+", Val 1, "+")
+            ]
+      forM_ testCases $ \(i, o, r) ->
+        it ("parses \"" ++ i ++ "\" as \"" ++ show o ++ "\" leaving \"" ++ r ++ "\"") $ do
+          prs expr i `shouldParse` o
+          prs' expr i `succeedsLeaving` r
     context "when given valid rendered AST" $
       it "can parse it back" $
         property $ \node -> do
@@ -146,7 +154,7 @@ lexeme :: Parser a -> Parser a
 lexeme p = p <* hidden space
 
 symbol :: String -> Parser String
-symbol = lexeme . string
+symbol = try . lexeme . string
 
 parens :: Parser a -> Parser a
 parens = between (symbol "(") (symbol ")")
@@ -160,7 +168,7 @@ integer = lexeme (read <$> some digitChar <?> "integer")
 -- representation.
 
 expr :: Parser Node
-expr = makeExprParser term table
+expr = makeExprParser (try term) table
 
 term :: Parser Node
 term = parens expr <|> (Val <$> integer) <?> "term"
