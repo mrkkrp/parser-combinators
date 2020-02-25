@@ -38,10 +38,11 @@
 -- >               <*> toPermutation (char 'b')
 -- >               <*> toPermutationWithDefault '_' (char 'c')
 --
--- Note that the functions in this module fail to parse some inputs which
--- would be parsed successfully by the functions in the 'Text.Parsec.Perm'
--- module of the [parsec](https://hackage.haskell.org/package/parsec)
--- library. For example, in the following code:
+-- Note that unlike [parsec's](https://hackage.haskell.org/package/parsec)
+-- permutation parser, this module will not backtrack if an early match
+-- leads to a parser failure. This means that it will not parse some inputs
+-- which would be successfully parsed by the functions in
+-- 'Text.Parsec.Perm'. For example, in the following code:
 --
 -- > import Text.Parsec (parseTest, string)
 -- > import Text.Parsec.Perm ((<$$>), (<||>), permute)
