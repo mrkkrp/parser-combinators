@@ -38,6 +38,39 @@
 -- >               <*> toPermutation (char 'b')
 -- >               <*> toPermutationWithDefault '_' (char 'c')
 --
+-- Note that the functions in this module fail to parse some inputs which
+-- would be parsed successfully by the functions in the 'Text.Parsec.Perm'
+-- module of the [parsec](https://hackage.haskell.org/package/parsec)
+-- library. For example, in the following code:
+--
+-- > import Text.Parsec (parseTest, string)
+-- > import Text.Parsec.Perm ((<$$>), (<||>), permute)
+-- > import Control.Applicative.Permutations (runPermutation, toPermutation)
+-- >
+-- > type Parser = Parsec String ()
+-- >
+-- > p1 :: Parser String
+-- > p1 = permute $ (<>)
+-- >   <$$> (string "foo")
+-- >   <||> (string "foobar")
+-- >
+-- > p2 :: Parser String
+-- > p2 = runPermutation $ (<>)
+-- >   <$> toPermutation (string "foo")
+-- >   <*> toPermutation (string "foobar")
+--
+-- We have
+--
+-- >>> parseTest p1 "foobarfoo"
+-- "foofoobar"
+--
+-- But
+--
+-- >>> parseTest p2 "foobarfoo"
+-- parse error at (line 1, column 4):
+-- unexpected "b"
+-- expecting "foobar"
+--
 -- @since 0.2.0
 
 module Control.Applicative.Permutations
