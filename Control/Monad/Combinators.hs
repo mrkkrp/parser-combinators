@@ -300,8 +300,7 @@ skipSome p = p >> skipMany p
 {-# INLINE skipSome #-}
 
 -- | @'skipCount' n p@ parses @n@ occurrences of @p@, skipping its result.
--- If @n@ is smaller or equal to zero, the parser equals to @'return' []@.
--- Returns a list of @n@ values.
+-- If @n@ is smaller or equal to zero, the parser equals to @'return' ()@.
 --
 -- See also: 'count', 'count''.
 
