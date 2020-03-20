@@ -315,8 +315,7 @@ skipSome p = p *> skipMany p
 {-# INLINE skipSome #-}
 
 -- | @'skipCount' n p@ parses @n@ occurrences of @p@, skipping its result.
--- If @n@ is not positive, the parser equals to @'pure' []@. Returns a list
--- of @n@ values.
+-- If @n@ is not positive, the parser equals to @'pure' ()@.
 --
 -- > skipCount = replicateM_
 --
