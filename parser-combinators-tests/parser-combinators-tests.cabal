@@ -1,47 +1,52 @@
-name:                 parser-combinators-tests
-version:              1.2.1
-cabal-version:        1.18
-tested-with:          GHC==8.6.5, GHC==8.8.1, GHC==8.10.1
-license:              BSD3
-license-file:         LICENSE.md
-author:               Mark Karpov <markkarpov92@gmail.com>
-maintainer:           Mark Karpov <markkarpov92@gmail.com>
-homepage:             https://github.com/mrkkrp/parser-combinators
-bug-reports:          https://github.com/mrkkrp/parser-combinators/issues
-category:             Parsing
-synopsis:             Test suite of parser-combinators
-build-type:           Simple
-description:          Test suite of parser-combinators.
-extra-doc-files:      README.md
+cabal-version:   1.18
+name:            parser-combinators-tests
+version:         1.2.1
+license:         BSD3
+license-file:    LICENSE.md
+maintainer:      Mark Karpov <markkarpov92@gmail.com>
+author:          Mark Karpov <markkarpov92@gmail.com>
+tested-with:     ghc ==8.6.5 ghc ==8.8.1 ghc ==8.10.1
+homepage:        https://github.com/mrkkrp/parser-combinators
+bug-reports:     https://github.com/mrkkrp/parser-combinators/issues
+synopsis:        Test suite of parser-combinators
+description:     Test suite of parser-combinators.
+category:        Parsing
+build-type:      Simple
+extra-doc-files: README.md
 
 source-repository head
-  type:               git
-  location:           https://github.com/mrkkrp/parser-combinators.git
+    type:     git
+    location: https://github.com/mrkkrp/parser-combinators.git
 
 flag dev
-  description:        Turn on development settings.
-  manual:             True
-  default:            False
+    description: Turn on development settings.
+    default:     False
+    manual:      True
 
 test-suite tests
-  main-is:            Spec.hs
-  hs-source-dirs:     tests
-  type:               exitcode-stdio-1.0
-  build-depends:      QuickCheck       >= 2.7 && < 2.15
-                    , base             >= 4.12 && < 5.0
-                    , hspec            >= 2.0 && < 3.0
-                    , hspec-expectations >= 0.8 && < 0.9
-                    , hspec-megaparsec >= 2.0 && < 3.0
-                    , megaparsec       >= 8.0 && < 9.0
-                    , megaparsec-tests >= 8.0 && < 9.0
-                    , parser-combinators == 1.2.1
-  other-modules:      Control.Applicative.CombinatorsSpec
-                    , Control.Applicative.PermutationsSpec
-                    , Control.Monad.Combinators.ExprSpec
-                    , Control.Monad.CombinatorsSpec
-  build-tools:        hspec-discover   >= 2.0 && < 3.0
-  if flag(dev)
-    ghc-options:      -Wall -Werror
-  else
-    ghc-options:      -O2 -Wall
-  default-language:   Haskell2010
+    type:             exitcode-stdio-1.0
+    main-is:          Spec.hs
+    build-tools:      hspec-discover >=2.0 && <3.0
+    hs-source-dirs:   tests
+    other-modules:
+        Control.Applicative.CombinatorsSpec
+        Control.Applicative.PermutationsSpec
+        Control.Monad.Combinators.ExprSpec
+        Control.Monad.CombinatorsSpec
+
+    default-language: Haskell2010
+    build-depends:
+        QuickCheck >=2.7 && <2.15,
+        base >=4.12 && <5.0,
+        hspec >=2.0 && <3.0,
+        hspec-expectations >=0.8 && <0.9,
+        hspec-megaparsec >=2.0 && <3.0,
+        megaparsec >=8.0 && <9.0,
+        megaparsec-tests >=8.0 && <9.0,
+        parser-combinators ==1.2.1
+
+    if flag(dev)
+        ghc-options: -Wall -Werror
+
+    else
+        ghc-options: -O2 -Wall

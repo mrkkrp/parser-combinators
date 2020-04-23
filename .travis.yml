@@ -25,12 +25,18 @@ install:
   - travis_retry cabal new-update
 
 script:
-  - cabal new-build all --enable-tests --enable-benchmarks --flags=dev
-  - cabal new-test all --enable-tests --enable-benchmarks --flags=dev
-  - cabal new-haddock parser-combinators
-  # - cabal new-haddock parser-combinators-tests
+  # To avoid re-compilation it is important to use exactly the same
+  # configuration for all steps.
+  - export CONFIG="--enable-tests --enable-benchmarks --flags=dev"
+  - cabal format
+  - pushd parser-combinators-tests && cabal format && popd
+  - git diff --exit-code --color=always
+  - cabal new-build all $CONFIG
+  - cabal new-test all $CONFIG
+  - cabal new-haddock parser-combinators $CONFIG
+  # - cabal new-haddock parser-combinators-tests $CONFIG
   - cabal new-sdist
-  - cd parser-combinators-tests && cabal new-sdist
+  - pushd parser-combinators-tests && cabal new-sdist && popd
 
 notifications:
   email: false
