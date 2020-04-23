@@ -3,9 +3,9 @@
 module Control.Applicative.CombinatorsSpec (spec) where
 
 import Control.Applicative.Combinators
-import Data.Char (isLetter, isDigit)
+import Data.Char (isDigit, isLetter)
 import Data.List (intersperse)
-import Data.Maybe (fromMaybe, maybeToList, isNothing, fromJust)
+import Data.Maybe (fromJust, fromMaybe, isNothing, maybeToList)
 import Test.Hspec
 import Test.Hspec.Megaparsec
 import Test.Hspec.Megaparsec.AdHoc
@@ -14,24 +14,29 @@ import Text.Megaparsec.Char
 
 spec :: Spec
 spec = do
-
-  describe "between" $
-    it "works" . property $ \pre c n' post -> do
+  describe "between"
+    $ it "works" . property
+    $ \pre c n' post -> do
       let p = between (string pre) (string post) (many (char c))
           n = getNonNegative n'
           b = length (takeWhile (== c) post)
           z = replicate n c
           s = pre ++ z ++ post
       if b > 0
-        then prs_ p s `shouldFailWith` err (length pre + n + b)
-          ( etoks post <> etok c <>
-            if length post == b
-              then ueof
-              else utoks (drop b post) )
+        then
+          prs_ p s
+            `shouldFailWith` err
+              (length pre + n + b)
+              ( etoks post <> etok c
+                  <> if length post == b
+                    then ueof
+                    else utoks (drop b post)
+              )
         else prs_ p s `shouldParse` z
 
-  describe "choice" $
-    it "works" . property $ \cs' s' -> do
+  describe "choice"
+    $ it "works" . property
+    $ \cs' s' -> do
       let cs = getNonEmpty cs'
           p = choice (char <$> cs)
           s = [s']
@@ -53,44 +58,49 @@ spec = do
       let x = getNonNegative x'
           p = count' m n (char 'x')
           s = replicate x 'x'
-      if | n <= 0 || m > n ->
-           if x == 0
-             then prs_ p s `shouldParse` ""
-             else prs_ p s `shouldFailWith` err 0 (utok 'x' <> eeof)
-         | m <= x && x <= n ->
-           prs_ p s `shouldParse` s
-         | x < m ->
-           prs_ p s `shouldFailWith` err x (ueof <> etok 'x')
-         | otherwise ->
-           prs_ p s `shouldFailWith` err n (utok 'x' <> eeof)
+      if  | n <= 0 || m > n ->
+            if x == 0
+              then prs_ p s `shouldParse` ""
+              else prs_ p s `shouldFailWith` err 0 (utok 'x' <> eeof)
+          | m <= x && x <= n ->
+            prs_ p s `shouldParse` s
+          | x < m ->
+            prs_ p s `shouldFailWith` err x (ueof <> etok 'x')
+          | otherwise ->
+            prs_ p s `shouldFailWith` err n (utok 'x' <> eeof)
     rightOrder (count' 1 3 letterChar) "abc" "abc"
 
-  describe "eitherP" $
-    it "works" . property $ \ch -> do
+  describe "eitherP"
+    $ it "works" . property
+    $ \ch -> do
       let p = eitherP letterChar digitChar
           s = pure ch
-      if | isLetter ch -> prs_ p s `shouldParse` Left ch
-         | isDigit  ch -> prs_ p s `shouldParse` Right ch
-         | otherwise   -> prs_ p s `shouldFailWith`
-           err 0 (utok ch <> elabel "letter" <> elabel "digit")
+      if  | isLetter ch -> prs_ p s `shouldParse` Left ch
+          | isDigit ch -> prs_ p s `shouldParse` Right ch
+          | otherwise ->
+            prs_ p s
+              `shouldFailWith` err 0 (utok ch <> elabel "letter" <> elabel "digit")
 
   describe "endBy" $ do
     it "works" . property $ \n' c -> do
       let n = getNonNegative n'
           p = endBy (char 'a') (char '-')
           s = intersperse '-' (replicate n 'a') ++ [c]
-      if | c == 'a' && n == 0 ->
-           prs_ p s `shouldFailWith` err 1 (ueof <> etok '-')
-         | c == 'a' ->
-           prs_ p s `shouldFailWith` err (g n) (utok 'a' <> etok '-')
-         | c == '-' && n == 0 ->
-           prs_ p s `shouldFailWith` err 0 (utok '-' <> etok 'a'<> eeof)
-         | c /= '-' ->
-           prs_ p s `shouldFailWith` err (g n)
-             ( utok c <>
-               (if n > 0 then etok '-' else eeof) <>
-               (if n == 0 then etok 'a' else mempty) )
-         | otherwise -> prs_ p s `shouldParse` replicate n 'a'
+      if  | c == 'a' && n == 0 ->
+            prs_ p s `shouldFailWith` err 1 (ueof <> etok '-')
+          | c == 'a' ->
+            prs_ p s `shouldFailWith` err (g n) (utok 'a' <> etok '-')
+          | c == '-' && n == 0 ->
+            prs_ p s `shouldFailWith` err 0 (utok '-' <> etok 'a' <> eeof)
+          | c /= '-' ->
+            prs_ p s
+              `shouldFailWith` err
+                (g n)
+                ( utok c
+                    <> (if n > 0 then etok '-' else eeof)
+                    <> (if n == 0 then etok 'a' else mempty)
+                )
+          | otherwise -> prs_ p s `shouldParse` replicate n 'a'
     rightOrder (endBy letterChar (char ',')) "a,b,c," "abc"
 
   describe "endBy1" $ do
@@ -98,84 +108,100 @@ spec = do
       let n = getNonNegative n'
           p = endBy1 (char 'a') (char '-')
           s = intersperse '-' (replicate n 'a') ++ [c]
-      if | c == 'a' && n == 0 ->
-           prs_ p s `shouldFailWith` err 1 (ueof <> etok '-')
-         | c == 'a' ->
-           prs_ p s `shouldFailWith` err (g n) (utok 'a' <> etok '-')
-         | c == '-' && n == 0 ->
-           prs_ p s `shouldFailWith` err 0 (utok '-' <> etok 'a')
-         | c /= '-' ->
-           prs_ p s `shouldFailWith` err (g n)
-             ( utok c <>
-               (if n > 0 then etok '-' else mempty) <>
-               (if n == 0 then etok 'a' else mempty) )
-         | otherwise -> prs_ p s `shouldParse` replicate n 'a'
+      if  | c == 'a' && n == 0 ->
+            prs_ p s `shouldFailWith` err 1 (ueof <> etok '-')
+          | c == 'a' ->
+            prs_ p s `shouldFailWith` err (g n) (utok 'a' <> etok '-')
+          | c == '-' && n == 0 ->
+            prs_ p s `shouldFailWith` err 0 (utok '-' <> etok 'a')
+          | c /= '-' ->
+            prs_ p s
+              `shouldFailWith` err
+                (g n)
+                ( utok c
+                    <> (if n > 0 then etok '-' else mempty)
+                    <> (if n == 0 then etok 'a' else mempty)
+                )
+          | otherwise -> prs_ p s `shouldParse` replicate n 'a'
     rightOrder (endBy1 letterChar (char ',')) "a,b,c," "abc"
 
   describe "manyTill" $ do
     it "works" . property $ \a' b' c' -> do
-      let [a,b,c] = getNonNegative <$> [a',b',c']
+      let [a, b, c] = getNonNegative <$> [a', b', c']
           p = (,) <$> manyTill letterChar (char 'c') <*> many letterChar
           s = abcRow a b c
       if c == 0
-        then prs_ p s `shouldFailWith` err (a + b)
-             (ueof <> etok 'c' <> elabel "letter")
-        else let (pre, post) = break (== 'c') s
-             in prs_ p s `shouldParse` (pre, drop 1 post)
+        then
+          prs_ p s
+            `shouldFailWith` err
+              (a + b)
+              (ueof <> etok 'c' <> elabel "letter")
+        else
+          let (pre, post) = break (== 'c') s
+           in prs_ p s `shouldParse` (pre, drop 1 post)
     rightOrder (manyTill letterChar (char 'd')) "abcd" "abc"
 
   describe "manyTill_" $ do
     it "works" . property $ \a' b' c' -> do
-      let [a,b,c] = getNonNegative <$> [a',b',c']
+      let [a, b, c] = getNonNegative <$> [a', b', c']
           p = (,) <$> manyTill_ letterChar (char 'c') <*> many letterChar
           s = abcRow a b c
       if c == 0
-        then prs_ p s `shouldFailWith` err (a + b)
-             (ueof <> etok 'c' <> elabel "letter")
-        else let (pre, post) = break (== 'c') s
-             in prs_ p s `shouldParse` ((pre, 'c'), drop 1 post)
+        then
+          prs_ p s
+            `shouldFailWith` err
+              (a + b)
+              (ueof <> etok 'c' <> elabel "letter")
+        else
+          let (pre, post) = break (== 'c') s
+           in prs_ p s `shouldParse` ((pre, 'c'), drop 1 post)
     rightOrder (fst <$> manyTill_ letterChar (char 'd')) "abcd" "abc"
 
   describe "someTill" $ do
     it "works" . property $ \a' b' c' -> do
-      let [a,b,c] = getNonNegative <$> [a',b',c']
+      let [a, b, c] = getNonNegative <$> [a', b', c']
           p = (,) <$> someTill letterChar (char 'c') <*> many letterChar
           s = abcRow a b c
-      if | null s ->
-           prs_ p s `shouldFailWith` err 0 (ueof <> elabel "letter")
-         | c == 0 ->
-           prs_ p s `shouldFailWith` err (a + b)
-             (ueof <> etok 'c' <> elabel "letter")
-         | s == "c" ->
-           prs_ p s `shouldFailWith` err 1 (ueof <> etok 'c' <> elabel "letter")
-         | head s == 'c' ->
-           prs_ p s `shouldParse` ("c", drop 2 s)
-         | otherwise ->
-           let (pre, post) = break (== 'c') s
-           in prs_ p s `shouldParse` (pre, drop 1 post)
+      if  | null s ->
+            prs_ p s `shouldFailWith` err 0 (ueof <> elabel "letter")
+          | c == 0 ->
+            prs_ p s
+              `shouldFailWith` err
+                (a + b)
+                (ueof <> etok 'c' <> elabel "letter")
+          | s == "c" ->
+            prs_ p s `shouldFailWith` err 1 (ueof <> etok 'c' <> elabel "letter")
+          | head s == 'c' ->
+            prs_ p s `shouldParse` ("c", drop 2 s)
+          | otherwise ->
+            let (pre, post) = break (== 'c') s
+             in prs_ p s `shouldParse` (pre, drop 1 post)
     rightOrder (someTill letterChar (char 'd')) "abcd" "abc"
 
   describe "someTill_" $ do
     it "works" . property $ \a' b' c' -> do
-      let [a,b,c] = getNonNegative <$> [a',b',c']
+      let [a, b, c] = getNonNegative <$> [a', b', c']
           p = (,) <$> someTill_ letterChar (char 'c') <*> many letterChar
           s = abcRow a b c
-      if | null s ->
-           prs_ p s `shouldFailWith` err 0 (ueof <> elabel "letter")
-         | c == 0 ->
-           prs_ p s `shouldFailWith` err (a + b)
-             (ueof <> etok 'c' <> elabel "letter")
-         | s == "c" ->
-           prs_ p s `shouldFailWith` err 1 (ueof <> etok 'c' <> elabel "letter")
-         | head s == 'c' ->
-           prs_ p s `shouldParse` (("c", 'c'), drop 2 s)
-         | otherwise ->
-           let (pre, post) = break (== 'c') s
-           in prs_ p s `shouldParse` ((pre, 'c'), drop 1 post)
+      if  | null s ->
+            prs_ p s `shouldFailWith` err 0 (ueof <> elabel "letter")
+          | c == 0 ->
+            prs_ p s
+              `shouldFailWith` err
+                (a + b)
+                (ueof <> etok 'c' <> elabel "letter")
+          | s == "c" ->
+            prs_ p s `shouldFailWith` err 1 (ueof <> etok 'c' <> elabel "letter")
+          | head s == 'c' ->
+            prs_ p s `shouldParse` (("c", 'c'), drop 2 s)
+          | otherwise ->
+            let (pre, post) = break (== 'c') s
+             in prs_ p s `shouldParse` ((pre, 'c'), drop 1 post)
     rightOrder (fst <$> someTill_ letterChar (char 'd')) "abcd" "abc"
 
-  describe "option" $
-    it "works" . property $ \d a s -> do
+  describe "option"
+    $ it "works" . property
+    $ \d a s -> do
       let p = option d (string a)
           p' = fromMaybe d <$> optional (string a)
       prs_ p s `shouldBe` prs_ p' s
@@ -186,16 +212,16 @@ spec = do
           c = fromJust c'
           p = sepBy (char 'a') (char '-')
           s = intersperse '-' (replicate n 'a') ++ maybeToList c'
-      if | isNothing c' ->
-           prs_ p s `shouldParse` replicate n 'a'
-         | c == 'a' && n == 0 ->
-           prs_ p s `shouldParse` "a"
-         | n == 0 ->
-           prs_ p s `shouldFailWith` err 0 (utok c <> etok 'a' <> eeof)
-         | c == '-' ->
-           prs_ p s `shouldFailWith` err (length s) (ueof <> etok 'a')
-         | otherwise ->
-           prs_ p s `shouldFailWith` err (g n) (utok c <> etok '-' <> eeof)
+      if  | isNothing c' ->
+            prs_ p s `shouldParse` replicate n 'a'
+          | c == 'a' && n == 0 ->
+            prs_ p s `shouldParse` "a"
+          | n == 0 ->
+            prs_ p s `shouldFailWith` err 0 (utok c <> etok 'a' <> eeof)
+          | c == '-' ->
+            prs_ p s `shouldFailWith` err (length s) (ueof <> etok 'a')
+          | otherwise ->
+            prs_ p s `shouldFailWith` err (g n) (utok c <> etok '-' <> eeof)
     rightOrder (sepBy letterChar (char ',')) "a,b,c" "abc"
 
   describe "sepBy1" $ do
@@ -204,18 +230,18 @@ spec = do
           c = fromJust c'
           p = sepBy1 (char 'a') (char '-')
           s = intersperse '-' (replicate n 'a') ++ maybeToList c'
-      if | isNothing c' && n >= 1 ->
-           prs_ p s `shouldParse` replicate n 'a'
-         | isNothing c' ->
-           prs_ p s `shouldFailWith` err 0 (ueof <> etok 'a')
-         | c == 'a' && n == 0 ->
-           prs_ p s `shouldParse` "a"
-         | n == 0 ->
-           prs_ p s `shouldFailWith` err 0 (utok c <> etok 'a')
-         | c == '-' ->
-           prs_ p s `shouldFailWith` err (length s) (ueof <> etok 'a')
-         | otherwise ->
-           prs_ p s `shouldFailWith` err (g n) (utok c <> etok '-' <> eeof)
+      if  | isNothing c' && n >= 1 ->
+            prs_ p s `shouldParse` replicate n 'a'
+          | isNothing c' ->
+            prs_ p s `shouldFailWith` err 0 (ueof <> etok 'a')
+          | c == 'a' && n == 0 ->
+            prs_ p s `shouldParse` "a"
+          | n == 0 ->
+            prs_ p s `shouldFailWith` err 0 (utok c <> etok 'a')
+          | c == '-' ->
+            prs_ p s `shouldFailWith` err (length s) (ueof <> etok 'a')
+          | otherwise ->
+            prs_ p s `shouldFailWith` err (g n) (utok c <> etok '-' <> eeof)
     rightOrder (sepBy1 letterChar (char ',')) "a,b,c" "abc"
 
   describe "sepEndBy" $ do
@@ -225,16 +251,16 @@ spec = do
           p = sepEndBy (char 'a') (char '-')
           a = replicate n 'a'
           s = intersperse '-' (replicate n 'a') ++ maybeToList c'
-      if | isNothing c' ->
-           prs_ p s `shouldParse` a
-         | c == 'a' && n == 0 ->
-           prs_ p s `shouldParse` "a"
-         | n == 0 ->
-           prs_ p s `shouldFailWith` err 0 (utok c <> etok 'a' <> eeof)
-         | c == '-' ->
-           prs_ p s `shouldParse` a
-         | otherwise ->
-           prs_ p s `shouldFailWith` err (g n) (utok c <> etok '-' <> eeof)
+      if  | isNothing c' ->
+            prs_ p s `shouldParse` a
+          | c == 'a' && n == 0 ->
+            prs_ p s `shouldParse` "a"
+          | n == 0 ->
+            prs_ p s `shouldFailWith` err 0 (utok c <> etok 'a' <> eeof)
+          | c == '-' ->
+            prs_ p s `shouldParse` a
+          | otherwise ->
+            prs_ p s `shouldFailWith` err (g n) (utok c <> etok '-' <> eeof)
     rightOrder (sepEndBy letterChar (char ',')) "a,b,c," "abc"
 
   describe "sepEndBy1" $ do
@@ -244,53 +270,58 @@ spec = do
           p = sepEndBy1 (char 'a') (char '-')
           a = replicate n 'a'
           s = intersperse '-' (replicate n 'a') ++ maybeToList c'
-      if | isNothing c' && n >= 1 ->
-           prs_ p s `shouldParse` a
-         | isNothing c' ->
-           prs_ p s `shouldFailWith` err 0 (ueof <> etok 'a')
-         | c == 'a' && n == 0 ->
-           prs_ p s `shouldParse` "a"
-         | n == 0 ->
-           prs_ p s `shouldFailWith` err 0 (utok c <> etok 'a')
-         | c == '-' ->
-           prs_ p s `shouldParse` a
-         | otherwise ->
-           prs_ p s `shouldFailWith` err (g n) (utok c <> etok '-' <> eeof)
+      if  | isNothing c' && n >= 1 ->
+            prs_ p s `shouldParse` a
+          | isNothing c' ->
+            prs_ p s `shouldFailWith` err 0 (ueof <> etok 'a')
+          | c == 'a' && n == 0 ->
+            prs_ p s `shouldParse` "a"
+          | n == 0 ->
+            prs_ p s `shouldFailWith` err 0 (utok c <> etok 'a')
+          | c == '-' ->
+            prs_ p s `shouldParse` a
+          | otherwise ->
+            prs_ p s `shouldFailWith` err (g n) (utok c <> etok '-' <> eeof)
     rightOrder (sepEndBy1 letterChar (char ',')) "a,b,c," "abc"
 
-  describe "skipMany" $
-    it "works" . property $ \c n' a -> do
+  describe "skipMany"
+    $ it "works" . property
+    $ \c n' a -> do
       let p = skipMany (char c) *> string a
           n = getNonNegative n'
           p' = many (char c) >> string a
           s = replicate n c ++ a
       prs_ p s `shouldBe` prs_ p' s
 
-  describe "skipSome" $
-    it "works" . property $ \c n' a -> do
+  describe "skipSome"
+    $ it "works" . property
+    $ \c n' a -> do
       let p = skipSome (char c) *> string a
           n = getNonNegative n'
           p' = some (char c) >> string a
           s = replicate n c ++ a
       prs_ p s `shouldBe` prs_ p' s
 
-  describe "skipCount" $
-    it "works" . property $ \c n' a -> do
+  describe "skipCount"
+    $ it "works" . property
+    $ \c n' a -> do
       let p = skipCount n (char c) *> string a
           n = getNonNegative n'
           p' = count n (char c) *> string a
           s = replicate n c ++ a
       prs_ p s `shouldBe` prs_ p' s
 
-  describe "skipManyTill" $
-    it "works" . property $ \c n' a -> c /= a ==> do
+  describe "skipManyTill"
+    $ it "works" . property
+    $ \c n' a -> c /= a ==> do
       let p = skipManyTill (char c) (char a)
           n = getNonNegative n'
           s = replicate n c ++ [a]
       prs_ p s `shouldParse` a
 
-  describe "skipSomeTill" $
-    it "works" . property $ \c n' a -> c /= a ==> do
+  describe "skipSomeTill"
+    $ it "works" . property
+    $ \c n' a -> c /= a ==> do
       let p = skipSomeTill (char c) (char a)
           n = getNonNegative n'
           s = replicate n c ++ [a]

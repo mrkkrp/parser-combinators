@@ -1,3 +1,6 @@
+{-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE TupleSections #-}
+
 -- |
 -- Module      :  Control.Applicative.Combinators
 -- Copyright   :  © 2017–present Mark Karpov
@@ -41,45 +44,42 @@
 -- backtrack in order for the alternative branch of parsing to be tried.
 -- Thus it is the responsibility of the programmer to wrap more complex,
 -- composite parsers in @try@ to achieve correct behavior.
-
-{-# LANGUAGE BangPatterns #-}
-{-# LANGUAGE TupleSections #-}
-
 module Control.Applicative.Combinators
   ( -- * Re-exports from "Control.Applicative"
-    (<|>)
+    (<|>),
     -- $assocbo
-  , many
+    many,
     -- $many
-  , some
+    some,
     -- $some
-  , optional
+    optional,
     -- $optional
-  , empty
+    empty,
     -- $empty
 
     -- * Original combinators
-  , between
-  , choice
-  , count
-  , count'
-  , eitherP
-  , endBy
-  , endBy1
-  , manyTill
-  , manyTill_
-  , someTill
-  , someTill_
-  , option
-  , sepBy
-  , sepBy1
-  , sepEndBy
-  , sepEndBy1
-  , skipMany
-  , skipSome
-  , skipCount
-  , skipManyTill
-  , skipSomeTill )
+    between,
+    choice,
+    count,
+    count',
+    eitherP,
+    endBy,
+    endBy1,
+    manyTill,
+    manyTill_,
+    someTill,
+    someTill_,
+    option,
+    sepBy,
+    sepBy1,
+    sepEndBy,
+    sepEndBy1,
+    skipMany,
+    skipSome,
+    skipCount,
+    skipManyTill,
+    skipSomeTill,
+  )
 where
 
 import Control.Applicative
@@ -132,7 +132,6 @@ import Data.Foldable
 -- Returns the value returned by @p@.
 --
 -- > braces = between (symbol "{") (symbol "}")
-
 between :: Applicative m => m open -> m close -> m a -> m a
 between open close p = open *> p <* close
 {-# INLINE between #-}
@@ -141,7 +140,6 @@ between open close p = open *> p <* close
 -- until one of them succeeds. Returns the value of the succeeding parser.
 --
 -- > choice = asum
-
 choice :: (Foldable f, Alternative m) => f (m a) -> m a
 choice = asum
 {-# INLINE choice #-}
@@ -153,7 +151,6 @@ choice = asum
 -- > count = replicateM
 --
 -- See also: 'skipCount', 'count''.
-
 count :: Applicative m => Int -> m a -> m [a]
 count = replicateM
 {-# INLINE count #-}
@@ -166,20 +163,18 @@ count = replicateM
 -- as if it were equal to zero.
 --
 -- See also: 'skipCount', 'count'.
-
 count' :: Alternative m => Int -> Int -> m a -> m [a]
 count' m' n' p = go m' n'
   where
     go !m !n
       | n <= 0 || m > n = pure []
-      | m > 0           = liftA2 (:) p (go (m - 1) (n - 1))
-      | otherwise       = liftA2 (:) p (go 0 (n - 1)) <|> pure []
+      | m > 0 = liftA2 (:) p (go (m - 1) (n - 1))
+      | otherwise = liftA2 (:) p (go 0 (n - 1)) <|> pure []
 {-# INLINE count' #-}
 
 -- | Combine two alternatives.
 --
 -- > eitherP a b = (Left <$> a) <|> (Right <$> b)
-
 eitherP :: Alternative m => m a -> m b -> m (Either a b)
 eitherP a b = (Left <$> a) <|> (Right <$> b)
 {-# INLINE eitherP #-}
@@ -188,14 +183,12 @@ eitherP a b = (Left <$> a) <|> (Right <$> b)
 -- ended by @sep@. Returns a list of values returned by @p@.
 --
 -- > cStatements = cStatement `endBy` semicolon
-
 endBy :: Alternative m => m a -> m sep -> m [a]
 endBy p sep = many (p <* sep)
 {-# INLINE endBy #-}
 
 -- | @'endBy1' p sep@ parses /one/ or more occurrences of @p@, separated and
 -- ended by @sep@. Returns a list of values returned by @p@.
-
 endBy1 :: Alternative m => m a -> m sep -> m [a]
 endBy1 p sep = some (p <* sep)
 {-# INLINE endBy1 #-}
@@ -205,7 +198,6 @@ endBy1 p sep = some (p <* sep)
 -- is consumed and lost. Use 'manyTill_' if you wish to keep it.
 --
 -- See also: 'skipMany', 'skipManyTill'.
-
 manyTill :: Alternative m => m a -> m end -> m [a]
 manyTill p end = go
   where
@@ -220,11 +212,10 @@ manyTill p end = go
 -- See also: 'skipMany', 'skipManyTill'.
 --
 -- @since 1.2.0
-
 manyTill_ :: Alternative m => m a -> m end -> m ([a], end)
 manyTill_ p end = go
   where
-    go = (([],) <$> end) <|> liftA2 (\x (xs, y) -> (x:xs, y)) p go
+    go = (([],) <$> end) <|> liftA2 (\x (xs, y) -> (x : xs, y)) p go
 {-# INLINE manyTill_ #-}
 
 -- | @'someTill' p end@ works similarly to @'manyTill' p end@, but @p@
@@ -234,7 +225,6 @@ manyTill_ p end = go
 -- > someTill p end = liftA2 (:) p (manyTill p end)
 --
 -- See also: 'skipSome', 'skipSomeTill'.
-
 someTill :: Alternative m => m a -> m end -> m [a]
 someTill p end = liftA2 (:) p (manyTill p end)
 {-# INLINE someTill #-}
@@ -246,10 +236,9 @@ someTill p end = liftA2 (:) p (manyTill p end)
 -- See also: 'skipSome', 'skipSomeTill'.
 --
 -- @since 1.2.0
-
 someTill_ :: Alternative m => m a -> m end -> m ([a], end)
 someTill_ p end =
-  liftA2 (\x (xs, y) -> (x:xs, y)) p (manyTill_ p end)
+  liftA2 (\x (xs, y) -> (x : xs, y)) p (manyTill_ p end)
 {-# INLINE someTill_ #-}
 
 -- | @'option' x p@ tries to apply the parser @p@. If @p@ fails without
@@ -259,7 +248,6 @@ someTill_ p end =
 -- > option x p = p <|> pure x
 --
 -- See also: 'optional'.
-
 option :: Alternative m => a -> m a -> m a
 option x p = p <|> pure x
 {-# INLINE option #-}
@@ -268,28 +256,24 @@ option x p = p <|> pure x
 -- @sep@. Returns a list of values returned by @p@.
 --
 -- > commaSep p = p `sepBy` comma
-
 sepBy :: Alternative m => m a -> m sep -> m [a]
 sepBy p sep = sepBy1 p sep <|> pure []
 {-# INLINE sepBy #-}
 
 -- | @'sepBy1' p sep@ parses /one/ or more occurrences of @p@, separated by
 -- @sep@. Returns a list of values returned by @p@.
-
 sepBy1 :: Alternative m => m a -> m sep -> m [a]
 sepBy1 p sep = liftA2 (:) p (many (sep *> p))
 {-# INLINE sepBy1 #-}
 
 -- | @'sepEndBy' p sep@ parses /zero/ or more occurrences of @p@, separated
 -- and optionally ended by @sep@. Returns a list of values returned by @p@.
-
 sepEndBy :: Alternative m => m a -> m sep -> m [a]
 sepEndBy p sep = sepEndBy1 p sep <|> pure []
 {-# INLINE sepEndBy #-}
 
 -- | @'sepEndBy1' p sep@ parses /one/ or more occurrences of @p@, separated
 -- and optionally ended by @sep@. Returns a list of values returned by @p@.
-
 sepEndBy1 :: Alternative m => m a -> m sep -> m [a]
 sepEndBy1 p sep = liftA2 (:) p ((sep *> sepEndBy p sep) <|> pure [])
 {-# INLINEABLE sepEndBy1 #-}
@@ -298,7 +282,6 @@ sepEndBy1 p sep = liftA2 (:) p ((sep *> sepEndBy p sep) <|> pure [])
 -- its result.
 --
 -- See also: 'manyTill', 'skipManyTill'.
-
 skipMany :: Alternative m => m a -> m ()
 skipMany p = go
   where
@@ -309,7 +292,6 @@ skipMany p = go
 -- result.
 --
 -- See also: 'someTill', 'skipSomeTill'.
-
 skipSome :: Alternative m => m a -> m ()
 skipSome p = p *> skipMany p
 {-# INLINE skipSome #-}
@@ -322,7 +304,6 @@ skipSome p = p *> skipMany p
 -- See also: 'count', 'count''.
 --
 -- @since 0.3.0
-
 skipCount :: Applicative m => Int -> m a -> m ()
 skipCount = replicateM_
 {-# INLINE skipCount #-}
@@ -332,7 +313,6 @@ skipCount = replicateM_
 -- then returned.
 --
 -- See also: 'manyTill', 'skipMany'.
-
 skipManyTill :: Alternative m => m a -> m end -> m end
 skipManyTill p end = go
   where
@@ -344,7 +324,6 @@ skipManyTill p end = go
 -- then returned.
 --
 -- See also: 'someTill', 'skipSome'.
-
 skipSomeTill :: Alternative m => m a -> m end -> m end
 skipSomeTill p end = p *> skipManyTill p end
 {-# INLINE skipSomeTill #-}

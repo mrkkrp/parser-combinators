@@ -1,3 +1,5 @@
+{-# LANGUAGE BangPatterns #-}
+
 -- |
 -- Module      :  Control.Monad.Combinators
 -- Copyright   :  © 2017–present Mark Karpov
@@ -15,46 +17,44 @@
 -- "Control.Applicative.Combinators".
 --
 -- @since 0.4.0
-
-{-# LANGUAGE BangPatterns #-}
-
 module Control.Monad.Combinators
   ( -- * Re-exports from "Control.Applicative"
-    (C.<|>)
+    (C.<|>),
     -- $assocbo
-  , C.optional
+    C.optional,
     -- $optional
-  , C.empty
+    C.empty,
     -- $empty
 
     -- * Original combinators
-  , C.between
-  , C.choice
-  , count
-  , count'
-  , C.eitherP
-  , endBy
-  , endBy1
-  , many
-  , manyTill
-  , manyTill_
-  , some
-  , someTill
-  , someTill_
-  , C.option
-  , sepBy
-  , sepBy1
-  , sepEndBy
-  , sepEndBy1
-  , skipMany
-  , skipSome
-  , skipCount
-  , skipManyTill
-  , skipSomeTill )
+    C.between,
+    C.choice,
+    count,
+    count',
+    C.eitherP,
+    endBy,
+    endBy1,
+    many,
+    manyTill,
+    manyTill_,
+    some,
+    someTill,
+    someTill_,
+    C.option,
+    sepBy,
+    sepBy1,
+    sepEndBy,
+    sepEndBy1,
+    skipMany,
+    skipSome,
+    skipCount,
+    skipManyTill,
+    skipSomeTill,
+  )
 where
 
-import Control.Monad
 import qualified Control.Applicative.Combinators as C
+import Control.Monad
 
 ----------------------------------------------------------------------------
 -- Re-exports from "Control.Applicative"
@@ -87,7 +87,6 @@ import qualified Control.Applicative.Combinators as C
 -- values.
 --
 -- See also: 'skipCount', 'count''.
-
 count :: Monad m => Int -> m a -> m [a]
 count n' p = go id n'
   where
@@ -96,7 +95,7 @@ count n' p = go id n'
         then return (f [])
         else do
           x <- p
-          go (f . (x:)) (n - 1)
+          go (f . (x :)) (n - 1)
 {-# INLINE count #-}
 
 -- | @'count'' m n p@ parses from @m@ to @n@ occurrences of @p@. If @n@ is
@@ -107,7 +106,6 @@ count n' p = go id n'
 -- as if it were equal to zero.
 --
 -- See also: 'skipCount', 'count'.
-
 count' :: MonadPlus m => Int -> Int -> m a -> m [a]
 count' m' n' p =
   if n' > 0 && n' >= m'
@@ -118,7 +116,7 @@ count' m' n' p =
       if m > 0
         then do
           x <- p
-          gom (f . (x:)) (m - 1)
+          gom (f . (x :)) (m - 1)
         else god f (if m' <= 0 then n' else n' - m')
     god f !d =
       if d > 0
@@ -126,7 +124,7 @@ count' m' n' p =
           r <- C.optional p
           case r of
             Nothing -> return (f [])
-            Just  x -> god (f . (x:)) (d - 1)
+            Just x -> god (f . (x :)) (d - 1)
         else return (f [])
 {-# INLINE count' #-}
 
@@ -134,14 +132,12 @@ count' m' n' p =
 -- ended by @sep@. Returns a list of values returned by @p@.
 --
 -- > cStatements = cStatement `endBy` semicolon
-
 endBy :: MonadPlus m => m a -> m sep -> m [a]
 endBy p sep = many (p >>= \x -> x <$ sep)
 {-# INLINE endBy #-}
 
 -- | @'endBy1' p sep@ parses /one/ or more occurrences of @p@, separated and
 -- ended by @sep@. Returns a list of values returned by @p@.
-
 endBy1 :: MonadPlus m => m a -> m sep -> m [a]
 endBy1 p sep = some (p >>= \x -> x <$ sep)
 {-# INLINE endBy1 #-}
@@ -150,7 +146,6 @@ endBy1 p sep = some (p >>= \x -> x <$ sep)
 -- list of the values returned by @p@.
 --
 -- > identifier = (:) <$> letter <*> many (alphaNumChar <|> char '_')
-
 many :: MonadPlus m => m a -> m [a]
 many p = go id
   where
@@ -158,7 +153,7 @@ many p = go id
       r <- C.optional p
       case r of
         Nothing -> return (f [])
-        Just  x -> go (f . (x:))
+        Just x -> go (f . (x :))
 {-# INLINE many #-}
 
 -- | @'manyTill' p end@ applies parser @p@ /zero/ or more times until parser
@@ -167,7 +162,6 @@ many p = go id
 -- it.
 --
 -- See also: 'skipMany', 'skipManyTill'.
-
 manyTill :: MonadPlus m => m a -> m end -> m [a]
 manyTill p end = fst <$> manyTill_ p end
 {-# INLINE manyTill #-}
@@ -180,7 +174,6 @@ manyTill p end = fst <$> manyTill_ p end
 -- See also: 'skipMany', 'skipManyTill'.
 --
 -- @since 1.2.0
-
 manyTill_ :: MonadPlus m => m a -> m end -> m ([a], end)
 manyTill_ p end = go id
   where
@@ -188,16 +181,15 @@ manyTill_ p end = go id
       done <- C.optional end
       case done of
         Just done' -> return (f [], done')
-        Nothing  -> do
+        Nothing -> do
           x <- p
-          go (f . (x:))
+          go (f . (x :))
 {-# INLINE manyTill_ #-}
 
 -- | @'some' p@ applies the parser @p@ /one/ or more times and returns a
 -- list of the values returned by @p@.
 --
 -- > word = some letter
-
 some :: MonadPlus m => m a -> m [a]
 some p = liftM2 (:) p (many p)
 {-# INLINE some #-}
@@ -209,7 +201,6 @@ some p = liftM2 (:) p (many p)
 -- > someTill p end = liftM2 (:) p (manyTill p end)
 --
 -- See also: 'skipSome', 'skipSomeTill'.
-
 someTill :: MonadPlus m => m a -> m end -> m [a]
 someTill p end = liftM2 (:) p (manyTill p end)
 {-# INLINE someTill #-}
@@ -221,36 +212,32 @@ someTill p end = liftM2 (:) p (manyTill p end)
 -- See also: 'skipSome', 'skipSomeTill'.
 --
 -- @since 1.2.0
-
 someTill_ :: MonadPlus m => m a -> m end -> m ([a], end)
-someTill_ p end = liftM2 (\x (xs, y) -> (x:xs, y)) p (manyTill_ p end)
+someTill_ p end = liftM2 (\x (xs, y) -> (x : xs, y)) p (manyTill_ p end)
 {-# INLINE someTill_ #-}
 
 -- | @'sepBy' p sep@ parses /zero/ or more occurrences of @p@, separated by
 -- @sep@. Returns a list of values returned by @p@.
 --
 -- > commaSep p = p `sepBy` comma
-
 sepBy :: MonadPlus m => m a -> m sep -> m [a]
 sepBy p sep = do
   r <- C.optional p
   case r of
     Nothing -> return []
-    Just  x -> (x:) <$> many (sep >> p)
+    Just x -> (x :) <$> many (sep >> p)
 {-# INLINE sepBy #-}
 
 -- | @'sepBy1' p sep@ parses /one/ or more occurrences of @p@, separated by
 -- @sep@. Returns a list of values returned by @p@.
-
 sepBy1 :: MonadPlus m => m a -> m sep -> m [a]
 sepBy1 p sep = do
   x <- p
-  (x:) <$> many (sep >> p)
+  (x :) <$> many (sep >> p)
 {-# INLINE sepBy1 #-}
 
 -- | @'sepEndBy' p sep@ parses /zero/ or more occurrences of @p@, separated
 -- and optionally ended by @sep@. Returns a list of values returned by @p@.
-
 sepEndBy :: MonadPlus m => m a -> m sep -> m [a]
 sepEndBy p sep = go id
   where
@@ -258,22 +245,21 @@ sepEndBy p sep = go id
       r <- C.optional p
       case r of
         Nothing -> return (f [])
-        Just  x -> do
+        Just x -> do
           more <- C.option False (True <$ sep)
           if more
-            then go (f . (x:))
+            then go (f . (x :))
             else return (f [x])
 {-# INLINE sepEndBy #-}
 
 -- | @'sepEndBy1' p sep@ parses /one/ or more occurrences of @p@, separated
 -- and optionally ended by @sep@. Returns a list of values returned by @p@.
-
 sepEndBy1 :: MonadPlus m => m a -> m sep -> m [a]
 sepEndBy1 p sep = do
   x <- p
   more <- C.option False (True <$ sep)
   if more
-    then (x:) <$> sepEndBy p sep
+    then (x :) <$> sepEndBy p sep
     else return [x]
 {-# INLINE sepEndBy1 #-}
 
@@ -281,7 +267,6 @@ sepEndBy1 p sep = do
 -- its result.
 --
 -- See also: 'manyTill', 'skipManyTill'.
-
 skipMany :: MonadPlus m => m a -> m ()
 skipMany p = go
   where
@@ -294,7 +279,6 @@ skipMany p = go
 -- result.
 --
 -- See also: 'someTill', 'skipSomeTill'.
-
 skipSome :: MonadPlus m => m a -> m ()
 skipSome p = p >> skipMany p
 {-# INLINE skipSome #-}
@@ -303,7 +287,6 @@ skipSome p = p >> skipMany p
 -- If @n@ is smaller or equal to zero, the parser equals to @'return' ()@.
 --
 -- See also: 'count', 'count''.
-
 skipCount :: Monad m => Int -> m a -> m ()
 skipCount n' p = go n'
   where
@@ -317,7 +300,6 @@ skipCount n' p = go n'
 -- then returned.
 --
 -- See also: 'manyTill', 'skipMany'.
-
 skipManyTill :: MonadPlus m => m a -> m end -> m end
 skipManyTill p end = go
   where
@@ -325,7 +307,7 @@ skipManyTill p end = go
       r <- C.optional end
       case r of
         Nothing -> p >> go
-        Just  x -> return x
+        Just x -> return x
 {-# INLINE skipManyTill #-}
 
 -- | @'skipSomeTill' p end@ applies the parser @p@ /one/ or more times
@@ -333,7 +315,6 @@ skipManyTill p end = go
 -- then returned.
 --
 -- See also: 'someTill', 'skipSome'.
-
 skipSomeTill :: MonadPlus m => m a -> m end -> m end
 skipSomeTill p end = p >> skipManyTill p end
 {-# INLINE skipSomeTill #-}

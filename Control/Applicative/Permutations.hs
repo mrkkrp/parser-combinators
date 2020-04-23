@@ -39,22 +39,23 @@
 -- >               <*> toPermutationWithDefault '_' (char 'c')
 --
 -- @since 0.2.0
-
 module Control.Applicative.Permutations
   ( -- ** Permutation type
-    Permutation
+    Permutation,
+
     -- ** Permutation evaluators
-  , runPermutation
-  , intercalateEffect
+    runPermutation,
+    intercalateEffect,
+
     -- ** Permutation constructors
-  , toPermutation
-  , toPermutationWithDefault )
+    toPermutation,
+    toPermutationWithDefault,
+  )
 where
 
 import Control.Applicative
 
 -- | An 'Applicative' wrapper-type for constructing permutation parsers.
-
 data Permutation m a = P !(Maybe a) (m (Permutation m a))
 
 instance Functor m => Functor (Permutation m) where
@@ -72,16 +73,18 @@ instance Alternative m => Applicative (Permutation m) where
       rhsAlt = liftA2 f lhs <$> w
 
 -- | \"Unlifts\" a permutation parser into a parser to be evaluated.
-
-runPermutation
-  :: ( Alternative m
-     , Monad m)
-  => Permutation m a -- ^ Permutation specification
-  -> m a             -- ^ Resulting base monad capable of handling the permutation
+runPermutation ::
+  ( Alternative m,
+    Monad m
+  ) =>
+  -- | Permutation specification
+  Permutation m a ->
+  -- | Resulting base monad capable of handling the permutation
+  m a
 runPermutation (P value parser) = optional parser >>= f
-   where
-      f  Nothing = maybe empty pure value
-      f (Just p) = runPermutation p
+  where
+    f Nothing = maybe empty pure value
+    f (Just p) = runPermutation p
 
 -- | \"Unlifts\" a permutation parser into a parser to be evaluated with an
 -- intercalated effect. Useful for separators between permutation elements.
@@ -109,41 +112,44 @@ runPermutation (P value parser) = optional parser >>= f
 --       permutation.
 --     * No effects are intercalated between missing components with a
 --       default value.
-
-intercalateEffect
-  :: ( Alternative m
-     , Monad m)
-  => m b             -- ^ Effect to be intercalated between permutation components
-  -> Permutation m a -- ^ Permutation specification
-  -> m a             -- ^ Resulting base monad capable of handling the permutation
+intercalateEffect ::
+  ( Alternative m,
+    Monad m
+  ) =>
+  -- | Effect to be intercalated between permutation components
+  m b ->
+  -- | Permutation specification
+  Permutation m a ->
+  -- | Resulting base monad capable of handling the permutation
+  m a
 intercalateEffect = run noEffect
-   where
-     noEffect = pure ()
-
-     run :: (Alternative m, Monad m) => m c -> m b -> Permutation m a -> m a
-     run headSep tailSep (P value parser) = optional headSep >>= f
-       where
-         f  Nothing = maybe empty pure value
-         f (Just _) = optional parser >>= g
-         g  Nothing = maybe empty pure value
-         g (Just p) = run tailSep tailSep p
+  where
+    noEffect = pure ()
+    run :: (Alternative m, Monad m) => m c -> m b -> Permutation m a -> m a
+    run headSep tailSep (P value parser) = optional headSep >>= f
+      where
+        f Nothing = maybe empty pure value
+        f (Just _) = optional parser >>= g
+        g Nothing = maybe empty pure value
+        g (Just p) = run tailSep tailSep p
 
 -- | \"Lifts\" a parser to a permutation parser.
-
-toPermutation
-  :: Alternative m
-  => m a -- ^ Permutation component
-  -> Permutation m a
+toPermutation ::
+  Alternative m =>
+  -- | Permutation component
+  m a ->
+  Permutation m a
 toPermutation p = P Nothing $ pure <$> p
 
 -- | \"Lifts\" a parser with a default value to a permutation parser.
 --
 -- If no permutation containing the supplied parser can be parsed from the input,
 -- then the supplied default value is returned in lieu of a parse result.
-
-toPermutationWithDefault
-  :: Alternative m
-  => a   -- ^ Default Value
-  -> m a -- ^ Permutation component
-  -> Permutation m a
+toPermutationWithDefault ::
+  Alternative m =>
+  -- | Default Value
+  a ->
+  -- | Permutation component
+  m a ->
+  Permutation m a
 toPermutationWithDefault v p = P (Just v) $ pure <$> p
