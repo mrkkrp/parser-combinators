@@ -20,54 +20,51 @@ import Data.Semigroup ((<>))
 spec :: Spec
 spec =
   describe "makeExprParser" $ do
-    context "when given valid rendered AST"
-      $ it "can parse it back"
-      $ property
-      $ \node -> do
-        let s = showNode node
-        prs expr s `shouldParse` node
-        prs' expr s `succeedsLeaving` ""
-    context "when stream in empty"
-      $ it "signals correct parse error"
-      $ prs (expr <* eof) ""
-        `shouldFailWith` err
-          0
-          (ueof <> etok '-' <> elabel "term")
-    context "when term is missing"
-      $ it "signals correct parse error"
-      $ do
+    context "when given valid rendered AST" $
+      it "can parse it back" $
+        property $ \node -> do
+          let s = showNode node
+          prs expr s `shouldParse` node
+          prs' expr s `succeedsLeaving` ""
+    context "when stream in empty" $
+      it "signals correct parse error" $
+        prs (expr <* eof) ""
+          `shouldFailWith` err
+            0
+            (ueof <> etok '-' <> elabel "term")
+    context "when term is missing" $
+      it "signals correct parse error" $ do
         let p = expr <* eof
         prs p "-" `shouldFailWith` err 1 (ueof <> elabel "term")
         prs p "(" `shouldFailWith` err 1 (ueof <> etok '-' <> elabel "term")
         prs p "*" `shouldFailWith` err 0 (utok '*' <> etok '-' <> elabel "term")
-    context "operator is missing"
-      $ it "signals correct parse error"
-      $ property
-      $ \a b -> do
-        let p = expr <* eof
-            a' = inParens a
-            n = length a' + 1
-            s = a' ++ " " ++ inParens b
-            c = s !! n
-        if c == '-'
-          then prs p s `shouldParse` Sub a b
-          else
-            prs p s
-              `shouldFailWith` err
-                n
-                ( mconcat
-                    [ utok c,
-                      eeof,
-                      etok '!',
-                      etok '%',
-                      etok '*',
-                      etok '+',
-                      etok '-',
-                      etok '/',
-                      etok '?',
-                      etok '^'
-                    ]
-                )
+    context "operator is missing" $
+      it "signals correct parse error" $
+        property $ \a b -> do
+          let p = expr <* eof
+              a' = inParens a
+              n = length a' + 1
+              s = a' ++ " " ++ inParens b
+              c = s !! n
+          if c == '-'
+            then prs p s `shouldParse` Sub a b
+            else
+              prs p s
+                `shouldFailWith` err
+                  n
+                  ( mconcat
+                      [ utok c,
+                        eeof,
+                        etok '!',
+                        etok '%',
+                        etok '*',
+                        etok '+',
+                        etok '-',
+                        etok '/',
+                        etok '?',
+                        etok '^'
+                      ]
+                  )
 
 data Node
   = -- | literal value

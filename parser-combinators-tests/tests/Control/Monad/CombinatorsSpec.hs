@@ -27,7 +27,8 @@ spec = do
       let x = getNonNegative x'
           p = count' m n (char 'x')
           s = replicate x 'x'
-      if  | n <= 0 || m > n ->
+      if
+          | n <= 0 || m > n ->
             if x == 0
               then prs_ p s `shouldParse` ""
               else prs_ p s `shouldFailWith` err 0 (utok 'x' <> eeof)
@@ -44,7 +45,8 @@ spec = do
       let n = getNonNegative n'
           p = endBy (char 'a') (char '-')
           s = intersperse '-' (replicate n 'a') ++ [c]
-      if  | c == 'a' && n == 0 ->
+      if
+          | c == 'a' && n == 0 ->
             prs_ p s `shouldFailWith` err 1 (ueof <> etok '-')
           | c == 'a' ->
             prs_ p s `shouldFailWith` err (g n) (utok 'a' <> etok '-')
@@ -66,7 +68,8 @@ spec = do
       let n = getNonNegative n'
           p = endBy1 (char 'a') (char '-')
           s = intersperse '-' (replicate n 'a') ++ [c]
-      if  | c == 'a' && n == 0 ->
+      if
+          | c == 'a' && n == 0 ->
             prs_ p s `shouldFailWith` err (1 :: Int) (ueof <> etok '-')
           | c == 'a' ->
             prs_ p s `shouldFailWith` err (g n) (utok 'a' <> etok '-')
@@ -120,7 +123,8 @@ spec = do
       let [a, b, c] = getNonNegative <$> [a', b', c']
           p = (,) <$> someTill letterChar (char 'c') <*> many letterChar
           s = abcRow a b c
-      if  | null s ->
+      if
+          | null s ->
             prs_ p s `shouldFailWith` err 0 (ueof <> elabel "letter")
           | c == 0 ->
             prs_ p s
@@ -141,7 +145,8 @@ spec = do
       let [a, b, c] = getNonNegative <$> [a', b', c']
           p = (,) <$> someTill_ letterChar (char 'c') <*> many letterChar
           s = abcRow a b c
-      if  | null s ->
+      if
+          | null s ->
             prs_ p s `shouldFailWith` err 0 (ueof <> elabel "letter")
           | c == 0 ->
             prs_ p s
@@ -163,7 +168,8 @@ spec = do
           c = fromJust c'
           p = sepBy (char 'a') (char '-')
           s = intersperse '-' (replicate n 'a') ++ maybeToList c'
-      if  | isNothing c' ->
+      if
+          | isNothing c' ->
             prs_ p s `shouldParse` replicate n 'a'
           | c == 'a' && n == 0 ->
             prs_ p s `shouldParse` "a"
@@ -181,7 +187,8 @@ spec = do
           c = fromJust c'
           p = sepBy1 (char 'a') (char '-')
           s = intersperse '-' (replicate n 'a') ++ maybeToList c'
-      if  | isNothing c' && n >= 1 ->
+      if
+          | isNothing c' && n >= 1 ->
             prs_ p s `shouldParse` replicate n 'a'
           | isNothing c' ->
             prs_ p s `shouldFailWith` err 0 (ueof <> etok 'a')
@@ -202,7 +209,8 @@ spec = do
           p = sepEndBy (char 'a') (char '-')
           a = replicate n 'a'
           s = intersperse '-' (replicate n 'a') ++ maybeToList c'
-      if  | isNothing c' ->
+      if
+          | isNothing c' ->
             prs_ p s `shouldParse` a
           | c == 'a' && n == 0 ->
             prs_ p s `shouldParse` "a"
@@ -221,7 +229,8 @@ spec = do
           p = sepEndBy1 (char 'a') (char '-')
           a = replicate n 'a'
           s = intersperse '-' (replicate n 'a') ++ maybeToList c'
-      if  | isNothing c' && n >= 1 ->
+      if
+          | isNothing c' && n >= 1 ->
             prs_ p s `shouldParse` a
           | isNothing c' ->
             prs_ p s `shouldFailWith` err 0 (ueof <> etok 'a')
@@ -235,50 +244,47 @@ spec = do
             prs_ p s `shouldFailWith` err (g n) (utok c <> etok '-' <> eeof)
     rightOrder (sepEndBy1 letterChar (char ',')) "a,b,c," "abc"
 
-  describe "skipMany"
-    $ it "works" . property
-    $ \c n' a -> do
+  describe "skipMany" $
+    it "works" . property $ \c n' a -> do
       let p = skipMany (char c) *> string a
           n = getNonNegative n'
           p' = many (char c) >> string a
           s = replicate n c ++ a
       prs_ p s `shouldBe` prs_ p' s
 
-  describe "skipSome"
-    $ it "works" . property
-    $ \c n' a -> do
+  describe "skipSome" $
+    it "works" . property $ \c n' a -> do
       let p = skipSome (char c) *> string a
           n = getNonNegative n'
           p' = some (char c) >> string a
           s = replicate n c ++ a
       prs_ p s `shouldBe` prs_ p' s
 
-  describe "skipCount"
-    $ it "works" . property
-    $ \c n' a -> do
+  describe "skipCount" $
+    it "works" . property $ \c n' a -> do
       let p = skipCount n (char c) *> string a
           n = getNonNegative n'
           p' = count n (char c) *> string a
           s = replicate n c ++ a
       prs_ p s `shouldBe` prs_ p' s
 
-  describe "skipManyTill"
-    $ it "works" . property
-    $ \c n' a -> c /= a ==> do
-      let p = skipManyTill (char c) (char a)
-          n = getNonNegative n'
-          s = replicate n c ++ [a]
-      prs_ p s `shouldParse` a
+  describe "skipManyTill" $
+    it "works" . property $ \c n' a ->
+      c /= a ==> do
+        let p = skipManyTill (char c) (char a)
+            n = getNonNegative n'
+            s = replicate n c ++ [a]
+        prs_ p s `shouldParse` a
 
-  describe "skipSomeTill"
-    $ it "works" . property
-    $ \c n' a -> c /= a ==> do
-      let p = skipSomeTill (char c) (char a)
-          n = getNonNegative n'
-          s = replicate n c ++ [a]
-      if n == 0
-        then prs_ p s `shouldFailWith` err 0 (utok a <> etok c)
-        else prs_ p s `shouldParse` a
+  describe "skipSomeTill" $
+    it "works" . property $ \c n' a ->
+      c /= a ==> do
+        let p = skipSomeTill (char c) (char a)
+            n = getNonNegative n'
+            s = replicate n c ++ [a]
+        if n == 0
+          then prs_ p s `shouldFailWith` err 0 (utok a <> etok c)
+          else prs_ p s `shouldParse` a
 
 ----------------------------------------------------------------------------
 -- Helpers

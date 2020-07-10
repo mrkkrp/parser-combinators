@@ -16,53 +16,46 @@ spec :: Spec
 spec = do
   describe "runPermutation & Permutation" $ do
     describe "Functor instance" $ do
-      it "obeys identity law"
-        $ property
-        $ \n ->
+      it "obeys identity law" $
+        property $ \n ->
           prsp (fmap id (pure (n :: Int))) ""
             === prsp (id (pure n)) ""
-      it "obeys composition law"
-        $ property
-        $ \n m t ->
+      it "obeys composition law" $
+        property $ \n m t ->
           let f = (+ m)
               g = (* t)
            in prs (fmap (f . g) (pure (n :: Int))) ""
                 === prs ((fmap f . fmap g) (pure n)) ""
     describe "Applicative instance" $ do
-      it "obeys identity law"
-        $ property
-        $ \n ->
+      it "obeys identity law" $
+        property $ \n ->
           prsp (pure id <*> pure (n :: Int)) ""
             === prsp (pure n) ""
-      it "obeys composition law"
-        $ property
-        $ \n m t ->
+      it "obeys composition law" $
+        property $ \n m t ->
           let u = pure (+ m)
               v = pure (* t)
               w = pure (n :: Int)
            in prsp (pure (.) <*> u <*> v <*> w) ""
                 === prsp (u <*> (v <*> w)) ""
-      it "obeys homomorphism law"
-        $ property
-        $ \x m ->
+      it "obeys homomorphism law" $
+        property $ \x m ->
           let f = (+ m)
            in prsp (pure f <*> pure (x :: Int)) ""
                 === prsp (pure (f x)) ""
-      it "obeys interchange law"
-        $ property
-        $ \n y ->
+      it "obeys interchange law" $
+        property $ \n y ->
           let u = pure (+ n)
            in prsp (u <*> pure (y :: Int)) ""
                 === prsp (pure ($ y) <*> u) ""
-  describe "toPermutation"
-    $ it "works"
-    $ property
-    $ \xs s' -> forAll (shuffle xs) $ \ys -> do
-      let s = ys ++ s'
-          p = foldr f (pure []) xs
-          f x p' = (:) <$> toPermutation (char x) <*> p'
-      prsp p s `shouldParse` xs
-      prsp' p s `succeedsLeaving` s'
+  describe "toPermutation" $
+    it "works" $
+      property $ \xs s' -> forAll (shuffle xs) $ \ys -> do
+        let s = ys ++ s'
+            p = foldr f (pure []) xs
+            f x p' = (:) <$> toPermutation (char x) <*> p'
+        prsp p s `shouldParse` xs
+        prsp' p s `succeedsLeaving` s'
   describe "toPermutationWithDefault" $ do
     let testCases =
           [ ("abc", "abc", ""),
