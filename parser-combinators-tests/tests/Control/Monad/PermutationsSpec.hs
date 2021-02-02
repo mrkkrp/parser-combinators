@@ -1,9 +1,9 @@
 {-# LANGUAGE TypeFamilies #-}
 
-module Control.Applicative.PermutationsSpec (spec) where
+module Control.Monad.PermutationsSpec (spec) where
 
-import Control.Applicative.Permutations
 import Control.Monad
+import Control.Monad.Permutations
 import Data.List
 import Data.Void
 import Test.Hspec

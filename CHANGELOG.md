@@ -1,3 +1,16 @@
+## Parser combinators 1.3.0
+
+* Changed the `Control.Applicative.Permutations` module to only require
+  `Applicative` and not `Monad`. This module is the least restrictive and works
+  with parsers which are not `Monad`s.
+
+* Added the `Control.Monad.Permutations` module. This module may be
+  substantially more efficient for some parsers which are `Monad`s.
+
+* Corrected how permutation parsers intercalate effects and components; parsing
+  an effect requires that a component immediately follows or else a parse error
+  will result.
+
 ## Parser combinators 1.2.1
 
 * The tests in `parser-combinators-tests` now work with Megaparsec 8.
