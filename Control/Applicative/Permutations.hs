@@ -1,3 +1,5 @@
+{-# LANGUAGE ExistentialQuantification #-}
+
 -- |
 -- Module      :  Control.Applicative.Permutations
 -- Copyright   :  © 2017–present Alex Washburn
@@ -30,8 +32,8 @@
 --
 -- For example, suppose we want to parse a permutation of: an optional
 -- string of @a@'s, the character @b@ and an optional @c@. Using a standard
--- parsing library combinator @char@, this can be described using the
--- 'Applicative' instance by:
+-- parsing library combinator @char@ (e.g. 'Text.ParserCombinators.ReadP.ReadP')
+-- this can be described using the 'Applicative' instance by:
 --
 -- > test = runPermutation $
 -- >          (,,) <$> toPermutationWithDefault ""  (some (char 'a'))
@@ -54,37 +56,41 @@ module Control.Applicative.Permutations
 where
 
 import Control.Applicative
+import Data.Function ((&))
 
 -- | An 'Applicative' wrapper-type for constructing permutation parsers.
-data Permutation m a = P !(Maybe a) (m (Permutation m a))
+data Permutation m a = P !(Maybe a) [Branch m a]
+
+data Branch m a = forall z. Branch (Permutation m (z -> a)) (m z)
 
 instance Functor m => Functor (Permutation m) where
-  fmap f (P v p) = P (f <$> v) (fmap f <$> p)
+  fmap f (P v bs) = P (f <$> v) (fmap f <$> bs)
 
-instance Alternative m => Applicative (Permutation m) where
+instance Functor p => Functor (Branch p) where
+  fmap f (Branch perm p) = Branch (fmap (f .) perm) p
+
+instance Functor m => Applicative (Permutation m) where
   pure value = P (Just value) empty
-  lhs@(P f v) <*> rhs@(P g w) = P (f <*> g) (lhsAlt <|> rhsAlt)
+  lhs@(P f v) <*> rhs@(P g w) = P (f <*> g) $ (ins2 <$> v) <> (ins1 <$> w)
     where
-      lhsAlt = (<*> rhs) <$> v
-      rhsAlt = (lhs <*>) <$> w
-  liftA2 f lhs@(P x v) rhs@(P y w) = P (liftA2 f x y) (lhsAlt <|> rhsAlt)
+      ins1 (Branch perm p) = Branch ((.) <$> lhs <*> perm) p
+      ins2 (Branch perm p) = Branch (flip <$> perm <*> rhs) p
+  liftA2 f lhs@(P x v) rhs@(P y w) = P (liftA2 f x y) $ (ins2 <$> v) <> (ins1 <$> w)
     where
-      lhsAlt = (\p -> liftA2 f p rhs) <$> v
-      rhsAlt = liftA2 f lhs <$> w
+      ins1 (Branch perm p) = Branch (liftA2 ((.) . f) lhs perm) p
+      ins2 (Branch perm p) = Branch (liftA2 (\b g z -> f (g z) b) rhs perm) p
 
 -- | \"Unlifts\" a permutation parser into a parser to be evaluated.
 runPermutation ::
-  ( Alternative m,
-    Monad m
-  ) =>
+  Alternative m =>
   -- | Permutation specification
   Permutation m a ->
   -- | Resulting base monad capable of handling the permutation
   m a
-runPermutation (P value parser) = optional parser >>= f
+runPermutation = foldAlt f
   where
-    f Nothing = maybe empty pure value
-    f (Just p) = runPermutation p
+    -- INCORRECT   = runPerms t <*> p
+    f (Branch t p) = (&) <$> p <*> runPermutation t
 
 -- | \"Unlifts\" a permutation parser into a parser to be evaluated with an
 -- intercalated effect. Useful for separators between permutation elements.
@@ -112,26 +118,24 @@ runPermutation (P value parser) = optional parser >>= f
 --       permutation.
 --     * No effects are intercalated between missing components with a
 --       default value.
+--     * If an effect is encountered after a component, another component must
+--       immediately follow the effect.
 intercalateEffect ::
-  ( Alternative m,
-    Monad m
-  ) =>
+  Alternative m =>
   -- | Effect to be intercalated between permutation components
   m b ->
   -- | Permutation specification
   Permutation m a ->
-  -- | Resulting base monad capable of handling the permutation
+  -- | Resulting base applicative capable of handling the permutation
   m a
-intercalateEffect = run noEffect
+intercalateEffect effect = foldAlt (runBranchEff effect)
   where
-    noEffect = pure ()
-    run :: (Alternative m, Monad m) => m c -> m b -> Permutation m a -> m a
-    run headSep tailSep (P value parser) = optional headSep >>= f
-      where
-        f Nothing = maybe empty pure value
-        f (Just _) = optional parser >>= g
-        g Nothing = maybe empty pure value
-        g (Just p) = run tailSep tailSep p
+    runPermEff :: Alternative m => m b -> Permutation m a -> m a
+    runPermEff eff (P v bs) =
+      eff *> foldr ((<|>) . runBranchEff eff) empty bs <|> maybe empty pure v
+
+    runBranchEff :: Alternative m => m b -> Branch m a -> m a
+    runBranchEff eff (Branch t p) = (&) <$> p <*> runPermEff eff t
 
 -- | \"Lifts\" a parser to a permutation parser.
 toPermutation ::
@@ -139,7 +143,7 @@ toPermutation ::
   -- | Permutation component
   m a ->
   Permutation m a
-toPermutation p = P Nothing $ pure <$> p
+toPermutation = P Nothing . pure . branch
 
 -- | \"Lifts\" a parser with a default value to a permutation parser.
 --
@@ -152,4 +156,10 @@ toPermutationWithDefault ::
   -- | Permutation component
   m a ->
   Permutation m a
-toPermutationWithDefault v p = P (Just v) $ pure <$> p
+toPermutationWithDefault v = P (Just v) . pure . branch
+
+branch :: Functor m => m a -> Branch m a
+branch = Branch $ pure id
+
+foldAlt :: Alternative m => (Branch m a -> m a) -> Permutation m a -> m a
+foldAlt f (P v bs) = foldr ((<|>) . f) (maybe empty pure v) bs
