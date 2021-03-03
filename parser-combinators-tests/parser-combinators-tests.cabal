@@ -5,7 +5,7 @@ license:         BSD3
 license-file:    LICENSE.md
 maintainer:      Mark Karpov <markkarpov92@gmail.com>
 author:          Mark Karpov <markkarpov92@gmail.com>
-tested-with:     ghc ==8.6.5 ghc ==8.8.4 ghc ==8.10.3
+tested-with:     ghc ==8.8.4 ghc ==8.10.4 ghc ==9.0.1
 homepage:        https://github.com/mrkkrp/parser-combinators
 bug-reports:     https://github.com/mrkkrp/parser-combinators/issues
 synopsis:        Test suite of parser-combinators
@@ -38,7 +38,7 @@ test-suite test-suite
     default-language: Haskell2010
     build-depends:
         QuickCheck >=2.7 && <2.15,
-        base >=4.12 && <5.0,
+        base >=4.13 && <5.0,
         hspec >=2.0 && <3.0,
         hspec-expectations >=0.8 && <0.9,
         hspec-megaparsec >=2.0 && <3.0,

@@ -8,7 +8,7 @@ author:
     Mark Karpov <markkarpov92@gmail.com>
     Alex Washburn <github@recursion.ninja>
 
-tested-with:     ghc ==8.6.5 ghc ==8.8.4 ghc ==8.10.3
+tested-with:     ghc ==8.8.4 ghc ==8.10.4 ghc ==9.0.1
 homepage:        https://github.com/mrkkrp/parser-combinators
 bug-reports:     https://github.com/mrkkrp/parser-combinators/issues
 synopsis:
@@ -43,7 +43,7 @@ library
         Control.Monad.Permutations
 
     default-language: Haskell2010
-    build-depends:    base >=4.12 && <5.0
+    build-depends:    base >=4.13 && <5.0
 
     if flag(dev)
         ghc-options: -Wall -Werror
