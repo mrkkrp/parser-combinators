@@ -26,7 +26,8 @@ spec = do
           prs_ p s
             `shouldFailWith` err
               (length pre + n + b)
-              ( etoks post <> etok c
+              ( etoks post
+                  <> etok c
                   <> if length post == b
                     then ueof
                     else utoks (drop b post)

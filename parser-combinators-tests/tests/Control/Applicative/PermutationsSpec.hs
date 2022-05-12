@@ -147,7 +147,8 @@ prsp' p = prs' (runPermutation p)
 
 testPermParser :: Permutation Parser String
 testPermParser =
-  f <$> toPermutationWithDefault 'x' (char 'a')
+  f
+    <$> toPermutationWithDefault 'x' (char 'a')
     <*> toPermutationWithDefault 'y' (char 'b')
     <*> toPermutationWithDefault 'z' (char 'c')
   where
