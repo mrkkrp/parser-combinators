@@ -1,5 +1,4 @@
 {-# LANGUAGE BangPatterns #-}
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE TupleSections #-}
 
 -- |
@@ -85,10 +84,6 @@ where
 
 import Control.Applicative
 import Control.Monad (replicateM, replicateM_)
-
-#if !MIN_VERSION_base(4,16,0)
-import Data.Foldable
-#endif
 
 ----------------------------------------------------------------------------
 -- Re-exports from "Control.Applicative"
