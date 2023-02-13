@@ -33,10 +33,10 @@ import Control.Applicative
 -- | An 'Applicative' wrapper-type for constructing permutation parsers.
 data Permutation m a = P !(Maybe a) (m (Permutation m a))
 
-instance Functor m => Functor (Permutation m) where
+instance (Functor m) => Functor (Permutation m) where
   fmap f (P v p) = P (f <$> v) (fmap f <$> p)
 
-instance Alternative m => Applicative (Permutation m) where
+instance (Alternative m) => Applicative (Permutation m) where
   pure value = P (Just value) empty
   lhs@(P f v) <*> rhs@(P g w) = P (f <*> g) (lhsAlt <|> rhsAlt)
     where
@@ -84,7 +84,7 @@ intercalateEffect = run noEffect
 
 -- | \"Lifts\" a parser to a permutation parser.
 toPermutation ::
-  Alternative m =>
+  (Alternative m) =>
   -- | Permutation component
   m a ->
   Permutation m a
@@ -95,7 +95,7 @@ toPermutation p = P Nothing $ pure <$> p
 -- If no permutation containing the supplied parser can be parsed from the input,
 -- then the supplied default value is returned in lieu of a parse result.
 toPermutationWithDefault ::
-  Alternative m =>
+  (Alternative m) =>
   -- | Default Value
   a ->
   -- | Permutation component

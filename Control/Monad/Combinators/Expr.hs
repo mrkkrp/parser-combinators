@@ -93,7 +93,7 @@ data Operator m a
 -- > prefix  name f = Prefix  (f <$ symbol name)
 -- > postfix name f = Postfix (f <$ symbol name)
 makeExprParser ::
-  MonadPlus m =>
+  (MonadPlus m) =>
   -- | Term parser
   m a ->
   -- | Operator table, see 'Operator'
@@ -105,7 +105,7 @@ makeExprParser = foldl addPrecLevel
 
 -- | @addPrecLevel p ops@ adds the ability to parse operators in table @ops@
 -- to parser @p@.
-addPrecLevel :: MonadPlus m => m a -> [Operator m a] -> m a
+addPrecLevel :: (MonadPlus m) => m a -> [Operator m a] -> m a
 addPrecLevel term ops =
   term' >>= \x -> choice [ras' x, las' x, nas' x, tern' x, return x]
   where
@@ -120,7 +120,7 @@ addPrecLevel term ops =
 -- | @pTerm prefix term postfix@ parses a @term@ surrounded by optional
 -- prefix and postfix unary operators. Parsers @prefix@ and @postfix@ are
 -- allowed to fail, in this case 'id' is used.
-pTerm :: MonadPlus m => m (a -> a) -> m a -> m (a -> a) -> m a
+pTerm :: (MonadPlus m) => m (a -> a) -> m a -> m (a -> a) -> m a
 pTerm prefix term postfix = do
   pre <- option id prefix
   x <- term
@@ -131,7 +131,7 @@ pTerm prefix term postfix = do
 -- | @pInfixN op p x@ parses non-associative infix operator @op@, then term
 -- with parser @p@, then returns result of the operator application on @x@
 -- and the term.
-pInfixN :: MonadPlus m => m (a -> a -> a) -> m a -> a -> m a
+pInfixN :: (MonadPlus m) => m (a -> a -> a) -> m a -> a -> m a
 pInfixN op p x = do
   f <- op
   y <- p
@@ -141,7 +141,7 @@ pInfixN op p x = do
 -- | @pInfixL op p x@ parses left-associative infix operator @op@, then term
 -- with parser @p@, then returns result of the operator application on @x@
 -- and the term.
-pInfixL :: MonadPlus m => m (a -> a -> a) -> m a -> a -> m a
+pInfixL :: (MonadPlus m) => m (a -> a -> a) -> m a -> a -> m a
 pInfixL op p x = do
   f <- op
   y <- p
@@ -152,7 +152,7 @@ pInfixL op p x = do
 -- | @pInfixR op p x@ parses right-associative infix operator @op@, then
 -- term with parser @p@, then returns result of the operator application on
 -- @x@ and the term.
-pInfixR :: MonadPlus m => m (a -> a -> a) -> m a -> a -> m a
+pInfixR :: (MonadPlus m) => m (a -> a -> a) -> m a -> a -> m a
 pInfixR op p x = do
   f <- op
   y <- p >>= \r -> pInfixR op p r <|> return r
@@ -160,7 +160,7 @@ pInfixR op p x = do
 {-# INLINE pInfixR #-}
 
 -- | Parse the first separator of a ternary operator
-pTernR :: MonadPlus m => m (m (a -> a -> a -> a)) -> m a -> a -> m a
+pTernR :: (MonadPlus m) => m (m (a -> a -> a -> a)) -> m a -> a -> m a
 pTernR sep1 p x = do
   sep2 <- sep1
   y <- p >>= \r -> pTernR sep1 p r `mplus` return r

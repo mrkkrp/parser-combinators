@@ -87,7 +87,7 @@ import Control.Monad
 -- values.
 --
 -- See also: 'skipCount', 'count''.
-count :: Monad m => Int -> m a -> m [a]
+count :: (Monad m) => Int -> m a -> m [a]
 count n' p = go id n'
   where
     go f !n =
@@ -106,7 +106,7 @@ count n' p = go id n'
 -- as if it were equal to zero.
 --
 -- See also: 'skipCount', 'count'.
-count' :: MonadPlus m => Int -> Int -> m a -> m [a]
+count' :: (MonadPlus m) => Int -> Int -> m a -> m [a]
 count' m' n' p =
   if n' > 0 && n' >= m'
     then gom id m'
@@ -132,13 +132,13 @@ count' m' n' p =
 -- ended by @sep@. Returns a list of values returned by @p@.
 --
 -- > cStatements = cStatement `endBy` semicolon
-endBy :: MonadPlus m => m a -> m sep -> m [a]
+endBy :: (MonadPlus m) => m a -> m sep -> m [a]
 endBy p sep = many (p >>= \x -> x <$ sep)
 {-# INLINE endBy #-}
 
 -- | @'endBy1' p sep@ parses /one/ or more occurrences of @p@, separated and
 -- ended by @sep@. Returns a list of values returned by @p@.
-endBy1 :: MonadPlus m => m a -> m sep -> m [a]
+endBy1 :: (MonadPlus m) => m a -> m sep -> m [a]
 endBy1 p sep = some (p >>= \x -> x <$ sep)
 {-# INLINE endBy1 #-}
 
@@ -146,7 +146,7 @@ endBy1 p sep = some (p >>= \x -> x <$ sep)
 -- list of the values returned by @p@.
 --
 -- > identifier = (:) <$> letter <*> many (alphaNumChar <|> char '_')
-many :: MonadPlus m => m a -> m [a]
+many :: (MonadPlus m) => m a -> m [a]
 many p = go id
   where
     go f = do
@@ -162,7 +162,7 @@ many p = go id
 -- it.
 --
 -- See also: 'skipMany', 'skipManyTill'.
-manyTill :: MonadPlus m => m a -> m end -> m [a]
+manyTill :: (MonadPlus m) => m a -> m end -> m [a]
 manyTill p end = fst <$> manyTill_ p end
 {-# INLINE manyTill #-}
 
@@ -174,7 +174,7 @@ manyTill p end = fst <$> manyTill_ p end
 -- See also: 'skipMany', 'skipManyTill'.
 --
 -- @since 1.2.0
-manyTill_ :: MonadPlus m => m a -> m end -> m ([a], end)
+manyTill_ :: (MonadPlus m) => m a -> m end -> m ([a], end)
 manyTill_ p end = go id
   where
     go f = do
@@ -190,7 +190,7 @@ manyTill_ p end = go id
 -- list of the values returned by @p@.
 --
 -- > word = some letter
-some :: MonadPlus m => m a -> m [a]
+some :: (MonadPlus m) => m a -> m [a]
 some p = liftM2 (:) p (many p)
 {-# INLINE some #-}
 
@@ -201,7 +201,7 @@ some p = liftM2 (:) p (many p)
 -- > someTill p end = liftM2 (:) p (manyTill p end)
 --
 -- See also: 'skipSome', 'skipSomeTill'.
-someTill :: MonadPlus m => m a -> m end -> m [a]
+someTill :: (MonadPlus m) => m a -> m end -> m [a]
 someTill p end = liftM2 (:) p (manyTill p end)
 {-# INLINE someTill #-}
 
@@ -212,7 +212,7 @@ someTill p end = liftM2 (:) p (manyTill p end)
 -- See also: 'skipSome', 'skipSomeTill'.
 --
 -- @since 1.2.0
-someTill_ :: MonadPlus m => m a -> m end -> m ([a], end)
+someTill_ :: (MonadPlus m) => m a -> m end -> m ([a], end)
 someTill_ p end = liftM2 (\x (xs, y) -> (x : xs, y)) p (manyTill_ p end)
 {-# INLINE someTill_ #-}
 
@@ -220,7 +220,7 @@ someTill_ p end = liftM2 (\x (xs, y) -> (x : xs, y)) p (manyTill_ p end)
 -- @sep@. Returns a list of values returned by @p@.
 --
 -- > commaSep p = p `sepBy` comma
-sepBy :: MonadPlus m => m a -> m sep -> m [a]
+sepBy :: (MonadPlus m) => m a -> m sep -> m [a]
 sepBy p sep = do
   r <- C.optional p
   case r of
@@ -230,7 +230,7 @@ sepBy p sep = do
 
 -- | @'sepBy1' p sep@ parses /one/ or more occurrences of @p@, separated by
 -- @sep@. Returns a list of values returned by @p@.
-sepBy1 :: MonadPlus m => m a -> m sep -> m [a]
+sepBy1 :: (MonadPlus m) => m a -> m sep -> m [a]
 sepBy1 p sep = do
   x <- p
   (x :) <$> many (sep >> p)
@@ -238,7 +238,7 @@ sepBy1 p sep = do
 
 -- | @'sepEndBy' p sep@ parses /zero/ or more occurrences of @p@, separated
 -- and optionally ended by @sep@. Returns a list of values returned by @p@.
-sepEndBy :: MonadPlus m => m a -> m sep -> m [a]
+sepEndBy :: (MonadPlus m) => m a -> m sep -> m [a]
 sepEndBy p sep = go id
   where
     go f = do
@@ -254,7 +254,7 @@ sepEndBy p sep = go id
 
 -- | @'sepEndBy1' p sep@ parses /one/ or more occurrences of @p@, separated
 -- and optionally ended by @sep@. Returns a list of values returned by @p@.
-sepEndBy1 :: MonadPlus m => m a -> m sep -> m [a]
+sepEndBy1 :: (MonadPlus m) => m a -> m sep -> m [a]
 sepEndBy1 p sep = do
   x <- p
   more <- C.option False (True <$ sep)
@@ -267,7 +267,7 @@ sepEndBy1 p sep = do
 -- its result.
 --
 -- See also: 'manyTill', 'skipManyTill'.
-skipMany :: MonadPlus m => m a -> m ()
+skipMany :: (MonadPlus m) => m a -> m ()
 skipMany p = go
   where
     go = do
@@ -279,7 +279,7 @@ skipMany p = go
 -- result.
 --
 -- See also: 'someTill', 'skipSomeTill'.
-skipSome :: MonadPlus m => m a -> m ()
+skipSome :: (MonadPlus m) => m a -> m ()
 skipSome p = p >> skipMany p
 {-# INLINE skipSome #-}
 
@@ -287,7 +287,7 @@ skipSome p = p >> skipMany p
 -- If @n@ is smaller or equal to zero, the parser equals to @'return' ()@.
 --
 -- See also: 'count', 'count''.
-skipCount :: Monad m => Int -> m a -> m ()
+skipCount :: (Monad m) => Int -> m a -> m ()
 skipCount n' p = go n'
   where
     go !n =
@@ -300,7 +300,7 @@ skipCount n' p = go n'
 -- then returned.
 --
 -- See also: 'manyTill', 'skipMany'.
-skipManyTill :: MonadPlus m => m a -> m end -> m end
+skipManyTill :: (MonadPlus m) => m a -> m end -> m end
 skipManyTill p end = go
   where
     go = do
@@ -315,6 +315,6 @@ skipManyTill p end = go
 -- then returned.
 --
 -- See also: 'someTill', 'skipSome'.
-skipSomeTill :: MonadPlus m => m a -> m end -> m end
+skipSomeTill :: (MonadPlus m) => m a -> m end -> m end
 skipSomeTill p end = p >> skipManyTill p end
 {-# INLINE skipSomeTill #-}
