@@ -8,7 +8,7 @@ author:
     Mark Karpov <markkarpov92@gmail.com>
     Alex Washburn <github@recursion.ninja>
 
-tested-with:     ghc ==9.0.2 ghc ==9.2.4 ghc ==9.4.1
+tested-with:     ghc ==9.0.2 ghc ==9.2.5 ghc ==9.4.4
 homepage:        https://github.com/mrkkrp/parser-combinators
 bug-reports:     https://github.com/mrkkrp/parser-combinators/issues
 synopsis:
