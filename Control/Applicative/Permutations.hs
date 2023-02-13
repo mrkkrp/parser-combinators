@@ -63,13 +63,13 @@ data Permutation m a = P !(Maybe a) [Branch m a]
 
 data Branch m a = forall z. Branch (Permutation m (z -> a)) (m z)
 
-instance Functor m => Functor (Permutation m) where
+instance (Functor m) => Functor (Permutation m) where
   fmap f (P v bs) = P (f <$> v) (fmap f <$> bs)
 
-instance Functor p => Functor (Branch p) where
+instance (Functor p) => Functor (Branch p) where
   fmap f (Branch perm p) = Branch (fmap (f .) perm) p
 
-instance Functor m => Applicative (Permutation m) where
+instance (Functor m) => Applicative (Permutation m) where
   pure value = P (Just value) empty
   lhs@(P f v) <*> rhs@(P g w) = P (f <*> g) $ (ins2 <$> v) <> (ins1 <$> w)
     where
@@ -82,7 +82,7 @@ instance Functor m => Applicative (Permutation m) where
 
 -- | \"Unlifts\" a permutation parser into a parser to be evaluated.
 runPermutation ::
-  Alternative m =>
+  (Alternative m) =>
   -- | Permutation specification
   Permutation m a ->
   -- | Resulting base monad capable of handling the permutation
@@ -121,7 +121,7 @@ runPermutation = foldAlt f
 --     * If an effect is encountered after a component, another component must
 --       immediately follow the effect.
 intercalateEffect ::
-  Alternative m =>
+  (Alternative m) =>
   -- | Effect to be intercalated between permutation components
   m b ->
   -- | Permutation specification
@@ -130,16 +130,16 @@ intercalateEffect ::
   m a
 intercalateEffect effect = foldAlt (runBranchEff effect)
   where
-    runPermEff :: Alternative m => m b -> Permutation m a -> m a
+    runPermEff :: (Alternative m) => m b -> Permutation m a -> m a
     runPermEff eff (P v bs) =
       eff *> foldr ((<|>) . runBranchEff eff) empty bs <|> maybe empty pure v
 
-    runBranchEff :: Alternative m => m b -> Branch m a -> m a
+    runBranchEff :: (Alternative m) => m b -> Branch m a -> m a
     runBranchEff eff (Branch t p) = (&) <$> p <*> runPermEff eff t
 
 -- | \"Lifts\" a parser to a permutation parser.
 toPermutation ::
-  Alternative m =>
+  (Alternative m) =>
   -- | Permutation component
   m a ->
   Permutation m a
@@ -150,7 +150,7 @@ toPermutation = P Nothing . pure . branch
 -- If no permutation containing the supplied parser can be parsed from the input,
 -- then the supplied default value is returned in lieu of a parse result.
 toPermutationWithDefault ::
-  Alternative m =>
+  (Alternative m) =>
   -- | Default Value
   a ->
   -- | Permutation component
@@ -158,8 +158,8 @@ toPermutationWithDefault ::
   Permutation m a
 toPermutationWithDefault v = P (Just v) . pure . branch
 
-branch :: Functor m => m a -> Branch m a
+branch :: (Functor m) => m a -> Branch m a
 branch = Branch $ pure id
 
-foldAlt :: Alternative m => (Branch m a -> m a) -> Permutation m a -> m a
+foldAlt :: (Alternative m) => (Branch m a -> m a) -> Permutation m a -> m a
 foldAlt f (P v bs) = foldr ((<|>) . f) (maybe empty pure v) bs
