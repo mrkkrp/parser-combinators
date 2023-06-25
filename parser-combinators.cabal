@@ -46,12 +46,9 @@ library
     build-depends:    base >=4.15 && <5.0
 
     if flag(dev)
-        ghc-options: -Wall -Werror
+        ghc-options:
+            -Wall -Werror -Wredundant-constraints -Wpartial-fields
+            -Wunused-packages
 
     else
         ghc-options: -O2 -Wall
-
-    if flag(dev)
-        ghc-options:
-            -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns
-            -Wnoncanonical-monad-instances
