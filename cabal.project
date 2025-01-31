@@ -1,2 +1,4 @@
-packages: parser-combinators.cabal
-        , parser-combinators-tests/parser-combinators-tests.cabal
+packages: . parser-combinators-tests
+tests: True
+benchmarks: True
+constraints: parser-combinators +dev, parser-combinators-tests +dev
