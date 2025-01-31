@@ -4,7 +4,7 @@
 [![Hackage](https://img.shields.io/hackage/v/parser-combinators.svg?style=flat)](https://hackage.haskell.org/package/parser-combinators)
 [![Stackage Nightly](http://stackage.org/package/parser-combinators/badge/nightly)](http://stackage.org/nightly/package/parser-combinators)
 [![Stackage LTS](http://stackage.org/package/parser-combinators/badge/lts)](http://stackage.org/lts/package/parser-combinators)
-![CI](https://github.com/mrkkrp/parser-combinators/workflows/CI/badge.svg?branch=master)
+[![CI](https://github.com/mrkkrp/parser-combinators/actions/workflows/ci.yaml/badge.svg)](https://github.com/mrkkrp/parser-combinators/actions/workflows/ci.yaml)
 
 The package provides common parser combinators defined in terms of
 `Applicative` and `Alternative` without any dependencies but `base`. There
