@@ -11,7 +11,7 @@
 -- considerations, depending on the monad the permutations are run over.
 --
 -- For a more general interface requiring only 'Applicative', and for more
--- complete documentation, see the 'Control.Applicative.Permutations' module.
+-- complete documentation, see the "Control.Applicative.Permutations" module.
 --
 -- @since 1.3.0
 module Control.Monad.Permutations
