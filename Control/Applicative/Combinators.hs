@@ -44,6 +44,26 @@
 -- backtrack in order for the alternative branch of parsing to be tried.
 -- Thus it is the responsibility of the programmer to wrap more complex,
 -- composite parsers in @try@ to achieve correct behavior.
+--
+-- === Short-circuiting #short-circuiting#
+--
+-- The lifted logical operators '<&&>' and '<||>'
+-- are lazy in evaluating /results/ (1, 2) assuming that @pure@ is lazy (3).
+-- However, note that these combinators are strict in executing /effects/:
+-- @p '<&&>' q@ and @p '<||>' q@ always run both @p@ and @q@ (4, 5).
+--
+-- 1. @pure False '<&&>' pure undefined@ = @pure False@
+-- 2. @pure True '<||>' pure undefined@ = @pure True@
+-- 3. @'Control.Monad.void' (pure undefined)@ = @pure ()@
+-- 4. @(False \<$ p) '<&&>' (True \<$ q)@ = @False \<$ (p *> q)@
+-- 5. @(True \<$ p) '<||>' (False \<$ q)@ = @True \<$ (p *> q)@
+--
+-- While this makes no difference when combining pure predicates,
+-- it may be significant for correctness or performance
+-- when combining actions in parsers or other monads.
+-- If you want short-circuiting of effects for these operators,
+-- use their counterparts in "Control.Monad.Combinators" instead.
+--
 module Control.Applicative.Combinators
   ( -- * Re-exports from "Control.Applicative"
     (<|>),
@@ -58,6 +78,8 @@ module Control.Applicative.Combinators
     -- $empty
 
     -- * Original combinators
+    (<&&>),
+    (<||>),
     between,
     choice,
     count,
@@ -126,6 +148,46 @@ import Control.Monad (replicateM, replicateM_)
 
 ----------------------------------------------------------------------------
 -- Original combinators
+
+-- | @p '<&&>' q@ parses @p@ followed by @q@
+-- and then combines their results with logical AND.
+-- It always parses both @p@ and @q@, even if @p@ returns @False@;
+-- see "Control.Applicative.Combinators#short-circuiting".
+--
+-- This may also be used to combine predicates:
+--
+-- @
+-- isBaseSixDigit :: Char -> Bool
+-- isBaseSixDigit = (>= \'0\') '<&&>' (\< \'6\')
+-- @
+--
+-- @\<&&>@ has the same precedence as '&&'.
+--
+-- See also: '<||>'.
+(<&&>) :: (Applicative m) => m Bool -> m Bool -> m Bool
+(<&&>) = liftA2 (&&)
+infixr 3 <&&>
+{-# INLINE (<&&>) #-}
+
+-- | @p '<||>' q@ parses @p@ followed by @q@
+-- and then combines their results with logical OR.
+-- It always parses both @p@ and @q@, even if @p@ returns @True@;
+-- see "Control.Applicative.Combinators#short-circuiting".
+--
+-- This may also be used to combine predicates:
+--
+-- @
+-- isAsciiLetter :: Char -> Bool
+-- isAsciiLetter = 'Data.Char.isAsciiUpper' '<||>' 'Data.Char.isAsciiLower'
+-- @
+--
+-- @\<||>@ has the same precedence as '||'.
+--
+-- See also: '<&&>'.
+(<||>) :: (Applicative m) => m Bool -> m Bool -> m Bool
+(<||>) = liftA2 (||)
+infixr 2 <||>
+{-# INLINE (<||>) #-}
 
 -- | @'between' open close p@ parses @open@, followed by @p@ and @close@.
 -- Returns the value returned by @p@.
