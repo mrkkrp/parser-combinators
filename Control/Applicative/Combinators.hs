@@ -82,8 +82,11 @@ module Control.Applicative.Combinators
   )
 where
 
-import Control.Applicative
+-- MicroHs has @Control.Applicative.asum :: Alternative f => [f a] -> f a@
+-- so we use @Data.Foldable.asum@
+import Control.Applicative hiding (asum)
 import Control.Monad (replicateM, replicateM_)
+import Data.Foldable (asum)
 
 ----------------------------------------------------------------------------
 -- Re-exports from "Control.Applicative"
