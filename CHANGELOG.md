@@ -1,3 +1,7 @@
+## Parser combinators 1.3.1
+
+* Compiles with [MicroHs](https://github.com/augustss/MicroHs).
+
 ## Parser combinators 1.3.0
 
 * Changed the `Control.Applicative.Permutations` module to only require
