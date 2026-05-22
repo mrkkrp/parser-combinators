@@ -13,6 +13,46 @@ import Text.Megaparsec.Char
 
 spec :: Spec
 spec = do
+
+  describe "logical" $ do
+    let
+      b  = undefined <$ char 'u' <|> False <$ char 'f' <|> True <$ char 't'
+      eb = etok 'u' <> etok 'f' <> etok 't'
+      uf = utok 'f'
+      ut = utok 't'
+      uu = utok 'u'
+      ux = utok 'x'
+
+    describe "<&&>" $ do
+      let p = b <&&> b
+      it "works" $ do
+        prs_ p "t"  `shouldFailWith` err 1 (eb <> ueof)
+        prs_ p "tf" `shouldParse`    False
+        prs_ p "tt" `shouldParse`    True
+        prs_ p "tx" `shouldFailWith` err 1 (eb <> ux)
+        prs_ p "x"  `shouldFailWith` err 0 (eb <> ux)
+      it "short-circuits" $ do
+        prs_ p "f"  `shouldParse`    False
+        prs_ p "ff" `shouldFailWith` err 1 (eeof <> uf)
+        prs_ p "ft" `shouldFailWith` err 1 (eeof <> ut)
+        prs_ p "fu" `shouldFailWith` err 1 (eeof <> uu)
+        prs_ p "fx" `shouldFailWith` err 1 (eeof <> ux)
+
+    describe "<||>" $ do
+      let p = b <||> b
+      it "works" $ do
+        prs_ p "f"  `shouldFailWith` err 1 (eb <> ueof)
+        prs_ p "ff" `shouldParse`    False
+        prs_ p "ft" `shouldParse`    True
+        prs_ p "fx" `shouldFailWith` err 1 (eb <> ux)
+        prs_ p "x"  `shouldFailWith` err 0 (eb <> ux)
+      it "short-circuits" $ do
+        prs_ p "t"  `shouldParse`    True
+        prs_ p "tf" `shouldFailWith` err 1 (eeof <> uf)
+        prs_ p "tt" `shouldFailWith` err 1 (eeof <> ut)
+        prs_ p "tu" `shouldFailWith` err 1 (eeof <> uu)
+        prs_ p "tx" `shouldFailWith` err 1 (eeof <> ux)
+
   describe "count" $ do
     it "works" . property $ \n x' -> do
       let x = getNonNegative x'

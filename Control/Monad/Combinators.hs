@@ -27,6 +27,8 @@ module Control.Monad.Combinators
     -- $empty
 
     -- * Original combinators
+    (<&&>),
+    (<||>),
     C.between,
     C.choice,
     count,
@@ -81,6 +83,42 @@ import Control.Monad
 
 ----------------------------------------------------------------------------
 -- Original combinators
+
+-- | @p '<&&>' q@ implements a
+-- [short-circuiting]("Control.Applicative.Combinators#short-circuiting")
+-- logical AND of @p@ and @q@, equivalent to:
+--
+-- - @p@, if @p@ succeeds and returns @False@
+-- - @p *> q@, if @p@ succeeds and returns @True@
+-- - 'empty', if either @p@ or @q@ fails
+--
+-- @\<&&>@ has the same precedence as '&&'.
+--
+-- See also: '<||>'.
+(<&&>) :: (Monad m) => m Bool -> m Bool -> m Bool
+p <&&> q = do
+  x <- p
+  if x then q else pure False
+infixr 3 <&&>
+{-# INLINE (<&&>) #-}
+
+-- | @p '<||>' q@ implements a
+-- [short-circuiting]("Control.Applicative.Combinators#short-circuiting")
+-- logical OR of @p@ and @q@, equivalent to:
+--
+-- - @p@, if @p@ succeeds and returns @True@
+-- - @p *> q@, if @p@ succeeds and returns @False@
+-- - 'empty', if either @p@ or @q@ fails
+--
+-- @\<||>@ has the same precedence as '||'.
+--
+-- See also: '<&&>'.
+(<||>) :: (Monad m) => m Bool -> m Bool -> m Bool
+p <||> q = do
+  x <- p
+  if x then pure True else q
+infixr 2 <||>
+{-# INLINE (<||>) #-}
 
 -- | @'count' n p@ parses @n@ occurrences of @p@. If @n@ is smaller or equal
 -- to zero, the parser equals to @'return' []@. Returns a list of @n@
