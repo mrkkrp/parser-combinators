@@ -21,12 +21,12 @@ spec =
           let s = showNode node
           prs expr s `shouldParse` node
           prs' expr s `succeedsLeaving` ""
-    context "when stream in empty" $
-      it "signals correct parse error" $
-        prs (expr <* eof) ""
-          `shouldFailWith` err
-            0
-            (ueof <> etok '-' <> elabel "term")
+    context "when stream in empty"
+      $ it "signals correct parse error"
+      $ prs (expr <* eof) ""
+        `shouldFailWith` err
+          0
+          (ueof <> etok '-' <> elabel "term")
     context "when term is missing" $
       it "signals correct parse error" $ do
         let p = expr <* eof

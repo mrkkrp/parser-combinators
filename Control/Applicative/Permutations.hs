@@ -14,7 +14,7 @@
 --
 -- https://hackage.haskell.org/package/parsec-permutation
 --
--- This module also takes inspiration from the algorithm is described in:
+-- This module also takes inspiration from the algorithm described in:
 -- /Parsing Permutation Phrases/, by Arthur Baars, Andres Löh and Doaitse
 -- Swierstra. Published as a functional pearl at the Haskell Workshop 2001:
 --
@@ -112,7 +112,7 @@ runPermutation = foldAlt f
 -- Note that the effect is intercalated /between/ permutation components and
 -- that:
 --
---     * There is never an effect parsed preceeding the first component of
+--     * There is never an effect parsed preceding the first component of
 --       the permutation.
 --     * There is never an effect parsed following the last component of the
 --       permutation.

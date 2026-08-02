@@ -7,7 +7,7 @@
 -- Stability   :  experimental
 -- Portability :  portable
 --
--- This module specialized the interface to 'Monad' for potential efficiency
+-- This module specializes the interface to 'Monad' for potential efficiency
 -- considerations, depending on the monad the permutations are run over.
 --
 -- For a more general interface requiring only 'Applicative', and for more

@@ -35,7 +35,7 @@ data Operator m a
   | -- | Postfix
     Postfix (m (a -> a))
   | -- | Right-associative ternary. Right-associative means that
-    -- @a ? b : d ? e : f@ parsed as
+    -- @a ? b : d ? e : f@ is parsed as
     -- @a ? b : (d ? e : f)@ and not as @(a ? b : d) ? e : f@.
     --
     -- The outer monadic action parses the first separator (e.g. @?@) and
@@ -56,7 +56,7 @@ data Operator m a
 -- (but may have different associativity).
 --
 -- Prefix and postfix operators of the same precedence associate to the left
--- (i.e. if @++@ is postfix increment, than @-2++@ equals @-1@, not @-3@).
+-- (i.e. if @++@ is postfix increment, then @-2++@ equals @-1@, not @-3@).
 --
 -- Unary operators of the same precedence can only occur once (i.e. @--2@ is
 -- not allowed if @-@ is prefix negate). If you need to parse several prefix
@@ -119,7 +119,7 @@ addPrecLevel term ops =
 
 -- | @pTerm prefix term postfix@ parses a @term@ surrounded by optional
 -- prefix and postfix unary operators. Parsers @prefix@ and @postfix@ are
--- allowed to fail, in this case 'id' is used.
+-- allowed to fail, in which case 'id' is used.
 pTerm :: (MonadPlus m) => m (a -> a) -> m a -> m (a -> a) -> m a
 pTerm prefix term postfix = do
   pre <- option id prefix
@@ -129,8 +129,8 @@ pTerm prefix term postfix = do
 {-# INLINE pTerm #-}
 
 -- | @pInfixN op p x@ parses non-associative infix operator @op@, then term
--- with parser @p@, then returns result of the operator application on @x@
--- and the term.
+-- with parser @p@, then returns the result of the operator application on
+-- @x@ and the term.
 pInfixN :: (MonadPlus m) => m (a -> a -> a) -> m a -> a -> m a
 pInfixN op p x = do
   f <- op
@@ -139,8 +139,8 @@ pInfixN op p x = do
 {-# INLINE pInfixN #-}
 
 -- | @pInfixL op p x@ parses left-associative infix operator @op@, then term
--- with parser @p@, then returns result of the operator application on @x@
--- and the term.
+-- with parser @p@, then returns the result of the operator application on
+-- @x@ and the term.
 pInfixL :: (MonadPlus m) => m (a -> a -> a) -> m a -> a -> m a
 pInfixL op p x = do
   f <- op
@@ -150,8 +150,8 @@ pInfixL op p x = do
 {-# INLINE pInfixL #-}
 
 -- | @pInfixR op p x@ parses right-associative infix operator @op@, then
--- term with parser @p@, then returns result of the operator application on
--- @x@ and the term.
+-- term with parser @p@, then returns the result of the operator application
+-- on @x@ and the term.
 pInfixR :: (MonadPlus m) => m (a -> a -> a) -> m a -> a -> m a
 pInfixR op p x = do
   f <- op

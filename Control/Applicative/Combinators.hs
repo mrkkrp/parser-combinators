@@ -32,15 +32,15 @@
 -- error messages. They typically backtrack only “atomic” parsers, e.g.
 -- those that match a token or several tokens in a row. To backtrack an
 -- arbitrary complex parser\/branch, a special combinator should be used,
--- typically called @try@. Combinators in this module are defined in terms
+-- typically called @try@. Combinators in this module are defined in terms of
 -- 'Applicative' and 'Alternative' operations. Being quite abstract, they
 -- cannot know anything about inner workings of any concrete parsing
 -- library, and so they cannot use @try@.
 --
 -- The essential feature of the 'Alternative' type class is the @('<|>')@
--- operator that allows to express choice. In libraries that do not
+-- operator that allows expressing choice. In libraries that do not
 -- backtrack everything automatically, the choice operator and everything
--- that is build on top of it require the parser on the left hand side to
+-- that is built on top of it require the parser on the left hand side to
 -- backtrack in order for the alternative branch of parsing to be tried.
 -- Thus it is the responsibility of the programmer to wrap more complex,
 -- composite parsers in @try@ to achieve correct behavior.
@@ -161,8 +161,8 @@ count = replicateM
 -- not positive or @m > n@, the parser equals to @'pure' []@. Returns a list
 -- of parsed values.
 --
--- Please note that @m@ /may/ be negative, in this case effect is the same
--- as if it were equal to zero.
+-- Please note that @m@ /may/ be negative, in which case the effect is the
+-- same as if it were equal to zero.
 --
 -- See also: 'skipCount', 'count'.
 count' :: (Alternative m) => Int -> Int -> m a -> m [a]
@@ -208,7 +208,7 @@ manyTill p end = go
 
 -- | @'manyTill_' p end@ applies parser @p@ /zero/ or more times until
 -- parser @end@ succeeds. Returns the list of values returned by @p@ and the
--- @end@ result. Use 'manyTill' if you have no need in the result of the
+-- @end@ result. Use 'manyTill' if you have no need for the result of the
 -- @end@.
 --
 -- See also: 'skipMany', 'skipManyTill'.
@@ -232,7 +232,7 @@ someTill p end = liftA2 (:) p (manyTill p end)
 {-# INLINE someTill #-}
 
 -- | @'someTill_' p end@ works similarly to @'manyTill_' p end@, but @p@
--- should succeed at least once. Use 'someTill' if you have no need in the
+-- should succeed at least once. Use 'someTill' if you have no need for the
 -- result of the @end@.
 --
 -- See also: 'skipSome', 'skipSomeTill'.

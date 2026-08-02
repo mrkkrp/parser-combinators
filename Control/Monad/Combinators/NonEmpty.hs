@@ -26,7 +26,7 @@ import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NE
 
 -- | @'some' p@ applies the parser @p@ /one/ or more times and returns a
--- list of the values returned by @p@.
+-- non-empty list of the values returned by @p@.
 --
 -- > word = some letter
 some :: (MonadPlus m) => m a -> m (NonEmpty a)

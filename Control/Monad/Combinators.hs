@@ -168,7 +168,7 @@ manyTill p end = fst <$> manyTill_ p end
 
 -- | @'manyTill_' p end@ applies parser @p@ /zero/ or more times until
 -- parser @end@ succeeds. Returns the list of values returned by @p@ and the
--- @end@ result. Use 'manyTill' if you have no need in the result of the
+-- @end@ result. Use 'manyTill' if you have no need for the result of the
 -- @end@.
 --
 -- See also: 'skipMany', 'skipManyTill'.
@@ -206,7 +206,7 @@ someTill p end = liftM2 (:) p (manyTill p end)
 {-# INLINE someTill #-}
 
 -- | @'someTill_' p end@ works similarly to @'manyTill_' p end@, but @p@
--- should succeed at least once. Use 'someTill' if you have no need in the
+-- should succeed at least once. Use 'someTill' if you have no need for the
 -- result of the @end@.
 --
 -- See also: 'skipSome', 'skipSomeTill'.

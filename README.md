@@ -7,9 +7,9 @@
 [![CI](https://github.com/mrkkrp/parser-combinators/actions/workflows/ci.yaml/badge.svg)](https://github.com/mrkkrp/parser-combinators/actions/workflows/ci.yaml)
 
 The package provides common parser combinators defined in terms of
-`Applicative` and `Alternative` without any dependencies but `base`. There
-are also more efficient versions of the combinators defined in terms of
-`Monad` and `MonadPlus`.
+`Applicative` and `Alternative` with no dependencies other than `base`.
+There are also more efficient versions of the combinators defined in terms
+of `Monad` and `MonadPlus`.
 
 ## Contribution
 
@@ -22,4 +22,4 @@ Pull requests are also welcome.
 
 Copyright © 2017–present Mark Karpov
 
-Distributed under BSD 3 clause license.
+Distributed under the BSD 3-clause license.
