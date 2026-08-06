@@ -14,6 +14,43 @@ import Text.Megaparsec.Char
 
 spec :: Spec
 spec = do
+
+  describe "logical" $ do
+    let
+      b  = undefined <$ char 'u' <|> False <$ char 'f' <|> True <$ char 't'
+      ux = utok 'x'
+      eb = etok 'u' <> etok 'f' <> etok 't'
+
+    describe "<&&>" $ do
+      let p = b <&&> b
+      it "works" $ do
+        prs_ p "t"  `shouldFailWith` err 1 (eb <> ueof)
+        prs_ p "tf" `shouldParse`    False
+        prs_ p "tt" `shouldParse`    True
+        prs_ p "tx" `shouldFailWith` err 1 (eb <> ux)
+        prs_ p "x"  `shouldFailWith` err 0 (eb <> ux)
+      it "does not short-circuit" $ do
+        prs_ p "f"  `shouldFailWith` err 1 (eb <> ueof)
+        prs_ p "ff" `shouldParse`    False
+        prs_ p "ft" `shouldParse`    False
+        prs_ p "fu" `shouldParse`    False
+        prs_ p "fx" `shouldFailWith` err 1 (eb <> ux)
+
+    describe "<||>" $ do
+      let p = b <||> b
+      it "works" $ do
+        prs_ p "f"  `shouldFailWith` err 1 (eb <> ueof)
+        prs_ p "ff" `shouldParse`    False
+        prs_ p "ft" `shouldParse`    True
+        prs_ p "fx" `shouldFailWith` err 1 (eb <> ux)
+        prs_ p "x"  `shouldFailWith` err 0 (eb <> ux)
+      it "does not short-circuit" $ do
+        prs_ p "t"  `shouldFailWith` err 1 (eb <> ueof)
+        prs_ p "tf" `shouldParse`    True
+        prs_ p "tt" `shouldParse`    True
+        prs_ p "tu" `shouldParse`    True
+        prs_ p "tx" `shouldFailWith` err 1 (eb <> ux)
+
   describe "between" $
     it "works" . property $ \pre c n' post -> do
       let p = between (string pre) (string post) (many (char c))
